@@ -1,48 +1,41 @@
 <!DOCTYPE html>
 <html>
-
 <head>
   <base target="_top">
   <meta charset="UTF-8">
-  <title>體育器材管理系統</title>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>體育器材管理系統 - Elite Edition</title>
+  <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
   <style>
     :root {
-      --bg-color: #0f1113;
-      --card-bg: #1e2124;
+      --bg-dark: #0a0a0a;
+      --card-bg: #1a1a1a;
       --accent-gold: #d4af37;
-      --accent-emerald: #2ecc71;
-      --accent-blue: #3498db;
       --text-main: #e0e0e0;
-      --text-dim: #999;
+      --text-dim: #888;
       --border-color: #333;
     }
 
     body {
-      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
-      background-color: var(--bg-color);
-      color: var(--text-main);
       margin: 0;
       padding: 20px;
-      display: flex;
-      flex-direction: column;
-      align-items: center;
+      background-color: var(--bg-dark);
+      color: var(--text-main);
+      font-family: 'Outfit', sans-serif;
     }
 
-    /* 標題欄 */
     header {
-      width: 100%;
-      max-width: 1200px;
       display: flex;
       justify-content: space-between;
       align-items: center;
+      padding-bottom: 20px;
+      border-bottom: 1px solid var(--accent-gold);
       margin-bottom: 30px;
-      border-bottom: 2px solid var(--accent-gold);
-      padding-bottom: 10px;
     }
 
     h1 {
       margin: 0;
-      font-size: 24px;
+      font-weight: 300;
       letter-spacing: 2px;
       color: var(--accent-gold);
       text-transform: uppercase;
@@ -50,134 +43,93 @@
 
     .status-badge {
       font-size: 12px;
-      padding: 4px 12px;
+      padding: 5px 12px;
       border-radius: 20px;
-      background: #333;
-      color: #fff;
+      background: #222;
+      border: 1px solid #444;
+      color: var(--text-dim);
     }
 
-    /* 器材架網格容器 */
+    /* 架子容器 */
     .racks-container {
       display: grid;
-      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
-      gap: 25px;
-      width: 100%;
-      max-width: 1400px;
+      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
+      gap: 30px;
     }
 
-    /* 單個架子 */
     .rack-card {
       background: var(--card-bg);
       border: 1px solid var(--border-color);
       border-radius: 12px;
       padding: 15px;
       box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-      transition: transform 0.3s ease;
-    }
-
-    .rack-card:hover {
-      border-color: var(--accent-gold);
-      transform: translateY(-5px);
     }
 
     .rack-header {
-      font-weight: bold;
       font-size: 18px;
       color: var(--accent-gold);
-      margin-bottom: 12px;
-      text-align: center;
-      border-bottom: 1px solid #444;
-      padding-bottom: 8px;
+      margin-bottom: 15px;
+      border-left: 3px solid var(--accent-gold);
+      padding-left: 10px;
     }
 
-    /* 層級與格子 */
+    /* 層級 Row */
     .level-row {
       display: flex;
-      flex-direction: column;
-      gap: 8px;
-      margin-bottom: 15px;
+      align-items: center;
+      margin-bottom: 10px;
+      background: rgba(255,255,255,0.03);
+      border-radius: 8px;
+      padding: 5px;
     }
 
     .level-label {
+      width: 60px;
       font-size: 11px;
       color: var(--text-dim);
-      text-transform: uppercase;
+      text-align: center;
     }
 
     .slots-row {
       display: flex;
-      gap: 6px;
-      height: 60px;
+      flex: 1;
+      gap: 5px;
     }
 
-    /* 格子樣式 */
+    /* 格子 Slot */
     .slot {
       flex: 1;
-      background: #2a2e33;
-      border-radius: 6px;
+      height: 60px;
+      background: #111;
+      border: 1px solid #222;
+      border-radius: 4px;
       display: flex;
       flex-direction: column;
       justify-content: center;
       align-items: center;
       cursor: pointer;
-      font-size: 12px;
-      position: relative;
+      transition: all 0.2s;
       overflow: hidden;
-      transition: all 0.2s ease;
-      border: 1px solid transparent;
+      position: relative;
     }
 
     .slot:hover {
-      background: #3a3f45;
-      border-color: var(--accent-blue);
+      border-color: var(--accent-gold);
+      background: #181818;
     }
 
-    .slot.occupied {
-      background: #1a1c1e;
-      opacity: 0.3;
-      cursor: not-allowed;
-    }
+    .slot.big { flex: 2.05; background: linear-gradient(135deg, #2c3e50 0%, #000 100%); border: 1px solid var(--accent-gold); }
+    .slot.has-item { background: rgba(212, 175, 55, 0.05); }
 
-    .slot.big {
-      flex: 2.05;
-      /* 大籃子佔用兩格 */
-      background: linear-gradient(135deg, #2c3e50 0%, #000 100%);
-      border: 1px solid var(--accent-gold);
-    }
+    .slot-id { font-size: 9px; color: #555; position: absolute; top: 3px; left: 5px; }
+    .item-name { font-size: 13px; font-weight: 400; text-align: center; color: var(--text-main); }
+    .item-qty { font-size: 11px; color: var(--accent-gold); margin-top: 2px; }
 
-    .slot.has-item {
-      background: rgba(46, 204, 113, 0.1);
-      border-left: 3px solid var(--accent-emerald);
-    }
-
-    .slot-id {
-      position: absolute;
-      top: 4px;
-      left: 4px;
-      font-size: 9px;
-      color: var(--text-dim);
-    }
-
-    .item-name {
-      font-weight: bold;
-      color: #fff;
-      text-align: center;
-      padding: 0 4px;
-    }
-
-    .item-qty {
-      font-size: 14px;
-      color: var(--accent-emerald);
-    }
-
-    /* 彈窗樣式 */
+    /* 編輯彈窗 */
     #modalOverlay {
       display: none;
       position: fixed;
-      top: 0;
-      left: 0;
-      width: 100%;
-      height: 100%;
+      top: 0; left: 0; width: 100%; height: 100%;
       background: rgba(0, 0, 0, 0.85);
       backdrop-filter: blur(8px);
       z-index: 1000;
@@ -186,101 +138,31 @@
     }
 
     .modal {
-      background: var(--card-bg);
-      width: 90%;
-      max-width: 400px;
-      border-radius: 16px;
+      background: #1a1a1a;
+      width: 350px;
       padding: 25px;
+      border-radius: 15px;
       border: 1px solid var(--accent-gold);
-      box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+      box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
     }
 
-    .modal-title {
-      font-size: 20px;
-      color: var(--accent-gold);
-      margin-bottom: 20px;
-    }
+    .modal-title { font-size: 18px; color: var(--accent-gold); margin-bottom: 20px; text-align: center; }
+    .form-group { margin-bottom: 15px; }
+    label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
+    select, input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; }
+    .btn-group { display: flex; gap: 10px; margin-top: 20px; }
+    button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
+    .btn-save { background: var(--accent-gold); color: #000; }
+    .btn-cancel { background: #444; color: #fff; }
 
-    .form-group {
-      margin-bottom: 15px;
-    }
-
-    label {
-      display: block;
-      margin-bottom: 6px;
-      color: var(--text-dim);
-      font-size: 13px;
-    }
-
-    select,
-    input {
-      width: 100%;
-      padding: 10px;
-      background: #111;
-      border: 1px solid #444;
-      border-radius: 6px;
-      color: #fff;
-      font-size: 16px;
-    }
-
-    .btn-group {
-      display: flex;
-      gap: 10px;
-      margin-top: 25px;
-    }
-
-    button {
-      flex: 1;
-      padding: 12px;
-      border-radius: 8px;
-      border: none;
-      cursor: pointer;
-      font-weight: bold;
-      transition: all 0.2s;
-    }
-
-    .btn-save {
-      background: var(--accent-gold);
-      color: #000;
-    }
-
-    .btn-cancel {
-      background: #444;
-      color: #fff;
-    }
-
-    button:hover {
-      opacity: 0.8;
-      transform: scale(1.02);
-    }
-
-    /* 讀取中 */
-    #loader {
-      position: fixed;
-      top: 50%;
-      left: 50%;
-      transform: translate(-50%, -50%);
-      font-size: 18px;
-      color: var(--accent-gold);
-    }
-
-    @media (max-width: 600px) {
-      body {
-        padding: 10px;
-      }
-
-      .racks-container {
-        grid-template-columns: 1fr;
-      }
-    }
+    #loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--accent-gold); }
   </style>
 </head>
-
 <body>
 
   <header>
     <h1>體育器材管理系統</h1>
-    <div id="loadingStatus" class="status-badge">正在連線資料庫...</div>
+    <div id="loadingStatus" class="status-badge">同步中...</div>
   </header>
 
   <div id="loader">載入中...</div>
@@ -294,28 +176,9 @@
         <input type="hidden" id="editSlotId">
         <input type="hidden" id="editRackId">
         <input type="hidden" id="editLevel">
-
-        <div class="form-group">
-          <label>器材名稱</label>
-          <select id="equipSelect">
-            <option value="">(空)</option>
-            <!-- 由 JS 動態填充 -->
-          </select>
-        </div>
-
-        <div class="form-group">
-          <label>數量</label>
-          <input type="number" id="qtyInput" min="0" value="0">
-        </div>
-
-        <div class="form-group">
-          <label>籃子大小</label>
-          <select id="sizeSelect">
-            <option value="小">小籃子 (1格)</option>
-            <option value="大">大籃子 (2格 / 固定向右合併)</option>
-          </select>
-        </div>
-
+        <div class="form-group"><label>器材名稱</label><select id="equipSelect"><option value="">(空)</option></select></div>
+        <div class="form-group"><label>數量</label><input type="number" id="qtyInput" min="0" value="0"></div>
+        <div class="form-group"><label>籃子大小</label><select id="sizeSelect"><option value="小">小籃子 (1格)</option><option value="大">大籃子 (2格 / 固定向右合併)</option></select></div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
           <button type="submit" class="btn-save">儲存更新</button>
@@ -325,7 +188,6 @@
   </div>
 
   <script>
-    // ✅ 已填入您的 GAS API 網址
     const API_URL = 'https://script.google.com/macros/s/AKfycbzkPjn7eBoY1UTTEH_ZIUHEbCctP5Nv_ED_0ZZnXe9S6LVY0k85BjJ7nLP83UHdJaCi/exec';
 
     let inventory = [];
@@ -336,34 +198,19 @@
       fetchEquipmentList();
     };
 
-    // 讀取資料 (GET)
     async function fetchData() {
       document.getElementById('loadingStatus').textContent = '同步中...';
       try {
-        // 使用最簡單的 fetch，不加 mode，讓瀏覽器自動處理
         const response = await fetch(`${API_URL}?action=getInventory`);
-        
-        if (!response.ok) throw new Error('HTTP 錯誤: ' + response.status);
-        
         inventory = await response.json();
         renderRacks();
         document.getElementById('loader').style.display = 'none';
         document.getElementById('loadingStatus').textContent = '已同步';
       } catch (err) {
-        console.error('讀取失敗:', err);
-        document.getElementById('loadingStatus').textContent = '連線失敗';
-        
-        // 直接把錯誤寫在畫面上給我看
-        document.getElementById('loader').innerHTML = 
-          `<div style="color:red; padding:20px;">
-            <h3>連線失敗詳細資訊：</h3>
-            <p>${err.message}</p>
-            <p>請確認 GAS 是否已部署為「任何人」並重新整理網頁。</p>
-          </div>`;
+        document.getElementById('loader').innerHTML = `<div style="color:red;text-align:center;">連線失敗：${err.message}</div>`;
       }
     }
 
-    // 讀取器材清單 (GET)
     async function fetchEquipmentList() {
       try {
         const response = await fetch(`${API_URL}?action=getEquipment`);
@@ -371,16 +218,59 @@
         const select = document.getElementById('equipSelect');
         equipmentList.forEach(item => {
           const opt = document.createElement('option');
-          opt.value = item;
-          opt.textContent = item;
+          opt.value = item; opt.textContent = item;
           select.appendChild(opt);
         });
-      } catch (err) {
-        console.error('器材清單讀取失敗:', err);
-      }
+      } catch (e) {}
     }
 
-    // 更新資料 (POST)
+    function renderRacks() {
+      const container = document.getElementById('racksContainer');
+      container.innerHTML = '';
+      const rackIds = [...new Set(inventory.map(item => item.Rack_ID))];
+      rackIds.forEach(rackId => {
+        const card = document.createElement('div');
+        card.className = 'rack-card';
+        card.innerHTML = `<div class="rack-header">架位 ${rackId}</div>`;
+        for (let l = 1; l <= 4; l++) {
+          const levelRow = document.createElement('div');
+          levelRow.className = 'level-row';
+          levelRow.innerHTML = `<div class="level-label">Level ${l}</div>`;
+          const slotsRow = document.createElement('div');
+          slotsRow.className = 'slots-row';
+          const levelData = inventory.filter(d => d.Rack_ID === rackId && d.Level == l);
+          for (let b = 1; b <= 4; b++) {
+            const slotData = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
+            if (!slotData || (slotData.Status && slotData.Status.includes('被'))) continue;
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'slot';
+            if (slotData.Basket_Size === '大') slotDiv.classList.add('big');
+            if (slotData.Equipment_Name) slotDiv.classList.add('has-item');
+            slotDiv.innerHTML = `<div class="slot-id">${slotData.Slot_ID}</div><div class="item-name">${slotData.Equipment_Name || ''}</div><div class="item-qty">${slotData.Quantity > 0 ? slotData.Quantity : ''}</div>`;
+            slotDiv.onclick = () => openModal(slotData);
+            slotsRow.appendChild(slotDiv);
+          }
+          levelRow.appendChild(slotsRow); card.appendChild(levelRow);
+        }
+        container.appendChild(card);
+      });
+    }
+
+    function openModal(data) {
+      document.getElementById('editSlotId').value = data.Slot_ID;
+      document.getElementById('editRackId').value = data.Rack_ID;
+      document.getElementById('editLevel').value = data.Level;
+      document.getElementById('modalTitle').textContent = `編輯位置: ${data.Slot_ID}`;
+      document.getElementById('equipSelect').value = data.Equipment_Name || '';
+      document.getElementById('qtyInput').value = data.Quantity || 0;
+      document.getElementById('sizeSelect').value = data.Basket_Size || '小';
+      const slotNum = parseInt(data.Slot_ID.split('-').pop());
+      document.getElementById('sizeSelect').disabled = (slotNum % 2 === 0);
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function closeModal() { document.getElementById('modalOverlay').style.display = 'none'; }
+
     document.getElementById('editForm').onsubmit = async (e) => {
       e.preventDefault();
       const payload = {
@@ -393,28 +283,12 @@
         size: document.getElementById('sizeSelect').value,
         operator: 'GitHub 網頁端'
       };
-
-      document.getElementById('loadingStatus').textContent = '更新中...';
       closeModal();
-
       try {
-        const response = await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify(payload)
-        });
-        const res = await response.json();
-        if (res.success) {
-          fetchData();
-        } else {
-          alert('錯誤: ' + res.message);
-        }
-      } catch (err) {
-        alert('連線錯誤，請確認 GAS 是否已部署為「任何人」皆可存取。');
-      }
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        fetchData();
+      } catch (err) { alert('更新失敗'); }
     };
-
-    // ... 其餘渲染邏輯 renderRacks, openModal, closeModal 保持不變 ...
   </script>
 </body>
-
 </html>
