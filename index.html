@@ -1,0 +1,422 @@
+<!DOCTYPE html>
+<html>
+
+<head>
+  <base target="_top">
+  <meta charset="UTF-8">
+  <title>體育器材管理系統</title>
+  <style>
+    :root {
+      --bg-color: #0f1113;
+      --card-bg: #1e2124;
+      --accent-gold: #d4af37;
+      --accent-emerald: #2ecc71;
+      --accent-blue: #3498db;
+      --text-main: #e0e0e0;
+      --text-dim: #999;
+      --border-color: #333;
+    }
+
+    body {
+      font-family: 'Inter', -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+      background-color: var(--bg-color);
+      color: var(--text-main);
+      margin: 0;
+      padding: 20px;
+      display: flex;
+      flex-direction: column;
+      align-items: center;
+    }
+
+    /* 標題欄 */
+    header {
+      width: 100%;
+      max-width: 1200px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+      margin-bottom: 30px;
+      border-bottom: 2px solid var(--accent-gold);
+      padding-bottom: 10px;
+    }
+
+    h1 {
+      margin: 0;
+      font-size: 24px;
+      letter-spacing: 2px;
+      color: var(--accent-gold);
+      text-transform: uppercase;
+    }
+
+    .status-badge {
+      font-size: 12px;
+      padding: 4px 12px;
+      border-radius: 20px;
+      background: #333;
+      color: #fff;
+    }
+
+    /* 器材架網格容器 */
+    .racks-container {
+      display: grid;
+      grid-template-columns: repeat(auto-fit, minmax(300px, 1fr));
+      gap: 25px;
+      width: 100%;
+      max-width: 1400px;
+    }
+
+    /* 單個架子 */
+    .rack-card {
+      background: var(--card-bg);
+      border: 1px solid var(--border-color);
+      border-radius: 12px;
+      padding: 15px;
+      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
+      transition: transform 0.3s ease;
+    }
+
+    .rack-card:hover {
+      border-color: var(--accent-gold);
+      transform: translateY(-5px);
+    }
+
+    .rack-header {
+      font-weight: bold;
+      font-size: 18px;
+      color: var(--accent-gold);
+      margin-bottom: 12px;
+      text-align: center;
+      border-bottom: 1px solid #444;
+      padding-bottom: 8px;
+    }
+
+    /* 層級與格子 */
+    .level-row {
+      display: flex;
+      flex-direction: column;
+      gap: 8px;
+      margin-bottom: 15px;
+    }
+
+    .level-label {
+      font-size: 11px;
+      color: var(--text-dim);
+      text-transform: uppercase;
+    }
+
+    .slots-row {
+      display: flex;
+      gap: 6px;
+      height: 60px;
+    }
+
+    /* 格子樣式 */
+    .slot {
+      flex: 1;
+      background: #2a2e33;
+      border-radius: 6px;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      align-items: center;
+      cursor: pointer;
+      font-size: 12px;
+      position: relative;
+      overflow: hidden;
+      transition: all 0.2s ease;
+      border: 1px solid transparent;
+    }
+
+    .slot:hover {
+      background: #3a3f45;
+      border-color: var(--accent-blue);
+    }
+
+    .slot.occupied {
+      background: #1a1c1e;
+      opacity: 0.3;
+      cursor: not-allowed;
+    }
+
+    .slot.big {
+      flex: 2.05;
+      /* 大籃子佔用兩格 */
+      background: linear-gradient(135deg, #2c3e50 0%, #000 100%);
+      border: 1px solid var(--accent-gold);
+    }
+
+    .slot.has-item {
+      background: rgba(46, 204, 113, 0.1);
+      border-left: 3px solid var(--accent-emerald);
+    }
+
+    .slot-id {
+      position: absolute;
+      top: 4px;
+      left: 4px;
+      font-size: 9px;
+      color: var(--text-dim);
+    }
+
+    .item-name {
+      font-weight: bold;
+      color: #fff;
+      text-align: center;
+      padding: 0 4px;
+    }
+
+    .item-qty {
+      font-size: 14px;
+      color: var(--accent-emerald);
+    }
+
+    /* 彈窗樣式 */
+    #modalOverlay {
+      display: none;
+      position: fixed;
+      top: 0;
+      left: 0;
+      width: 100%;
+      height: 100%;
+      background: rgba(0, 0, 0, 0.85);
+      backdrop-filter: blur(8px);
+      z-index: 1000;
+      justify-content: center;
+      align-items: center;
+    }
+
+    .modal {
+      background: var(--card-bg);
+      width: 90%;
+      max-width: 400px;
+      border-radius: 16px;
+      padding: 25px;
+      border: 1px solid var(--accent-gold);
+      box-shadow: 0 0 50px rgba(212, 175, 55, 0.2);
+    }
+
+    .modal-title {
+      font-size: 20px;
+      color: var(--accent-gold);
+      margin-bottom: 20px;
+    }
+
+    .form-group {
+      margin-bottom: 15px;
+    }
+
+    label {
+      display: block;
+      margin-bottom: 6px;
+      color: var(--text-dim);
+      font-size: 13px;
+    }
+
+    select,
+    input {
+      width: 100%;
+      padding: 10px;
+      background: #111;
+      border: 1px solid #444;
+      border-radius: 6px;
+      color: #fff;
+      font-size: 16px;
+    }
+
+    .btn-group {
+      display: flex;
+      gap: 10px;
+      margin-top: 25px;
+    }
+
+    button {
+      flex: 1;
+      padding: 12px;
+      border-radius: 8px;
+      border: none;
+      cursor: pointer;
+      font-weight: bold;
+      transition: all 0.2s;
+    }
+
+    .btn-save {
+      background: var(--accent-gold);
+      color: #000;
+    }
+
+    .btn-cancel {
+      background: #444;
+      color: #fff;
+    }
+
+    button:hover {
+      opacity: 0.8;
+      transform: scale(1.02);
+    }
+
+    /* 讀取中 */
+    #loader {
+      position: fixed;
+      top: 50%;
+      left: 50%;
+      transform: translate(-50%, -50%);
+      font-size: 18px;
+      color: var(--accent-gold);
+    }
+
+    @media (max-width: 600px) {
+      body {
+        padding: 10px;
+      }
+
+      .racks-container {
+        grid-template-columns: 1fr;
+      }
+    }
+  </style>
+</head>
+
+<body>
+
+  <header>
+    <h1>體育器材管理系統</h1>
+    <div id="loadingStatus" class="status-badge">正在連線資料庫...</div>
+  </header>
+
+  <div id="loader">載入中...</div>
+  <div id="racksContainer" class="racks-container"></div>
+
+  <!-- 編輯彈窗 -->
+  <div id="modalOverlay">
+    <div class="modal">
+      <div id="modalTitle" class="modal-title">位置編輯</div>
+      <form id="editForm">
+        <input type="hidden" id="editSlotId">
+        <input type="hidden" id="editRackId">
+        <input type="hidden" id="editLevel">
+
+        <div class="form-group">
+          <label>器材名稱</label>
+          <select id="equipSelect">
+            <option value="">(空)</option>
+            <!-- 由 JS 動態填充 -->
+          </select>
+        </div>
+
+        <div class="form-group">
+          <label>數量</label>
+          <input type="number" id="qtyInput" min="0" value="0">
+        </div>
+
+        <div class="form-group">
+          <label>籃子大小</label>
+          <select id="sizeSelect">
+            <option value="小">小籃子 (1格)</option>
+            <option value="大">大籃子 (2格 / 固定向右合併)</option>
+          </select>
+        </div>
+
+        <div class="btn-group">
+          <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn-save">儲存更新</button>
+        </div>
+      </form>
+    </div>
+  </div>
+
+  <script>
+    // ✅ 已填入您的 GAS API 網址
+    const API_URL = 'https://script.google.com/macros/s/AKfycbzkPjn7eBoY1UTTEH_ZIUHEbCctP5Nv_ED_0ZZnXe9S6LVY0k85BjJ7nLP83UHdJaCi/exec';
+
+    let inventory = [];
+    let equipmentList = [];
+
+    window.onload = () => {
+      fetchData();
+      fetchEquipmentList();
+    };
+
+    // 讀取資料 (GET)
+    async function fetchData() {
+      document.getElementById('loadingStatus').textContent = '同步中...';
+      try {
+        const response = await fetch(`${API_URL}?action=getInventory`, {
+          method: 'GET',
+          mode: 'cors', // 強制開啟 CORS 模式
+          redirect: 'follow'
+        });
+        
+        if (!response.ok) throw new Error('網路回應不正常');
+        
+        inventory = await response.json();
+        renderRacks();
+        document.getElementById('loader').style.display = 'none';
+        document.getElementById('loadingStatus').textContent = '已同步';
+      } catch (err) {
+        console.error('讀取失敗:', err);
+        document.getElementById('loadingStatus').textContent = '連線失敗';
+        
+        // 提示使用者
+        if (location.protocol === 'file:') {
+          alert('偵測到您是直接開啟本地檔案。請將網頁上傳到 GitHub 或使用 Web Server (如 Live Server) 執行，否則瀏覽器會阻擋連線。');
+        } else {
+          alert('連線失敗，請檢查 GAS 部署是否正確設定為「任何人 (Anyone)」。');
+        }
+      }
+    }
+
+    // 讀取器材清單 (GET)
+    async function fetchEquipmentList() {
+      try {
+        const response = await fetch(`${API_URL}?action=getEquipment`);
+        equipmentList = await response.json();
+        const select = document.getElementById('equipSelect');
+        equipmentList.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item;
+          opt.textContent = item;
+          select.appendChild(opt);
+        });
+      } catch (err) {
+        console.error('器材清單讀取失敗:', err);
+      }
+    }
+
+    // 更新資料 (POST)
+    document.getElementById('editForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: 'update',
+        slotId: document.getElementById('editSlotId').value,
+        rackId: document.getElementById('editRackId').value,
+        level: parseInt(document.getElementById('editLevel').value),
+        equipment: document.getElementById('equipSelect').value,
+        qty: parseInt(document.getElementById('qtyInput').value),
+        size: document.getElementById('sizeSelect').value,
+        operator: 'GitHub 網頁端'
+      };
+
+      document.getElementById('loadingStatus').textContent = '更新中...';
+      closeModal();
+
+      try {
+        const response = await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify(payload)
+        });
+        const res = await response.json();
+        if (res.success) {
+          fetchData();
+        } else {
+          alert('錯誤: ' + res.message);
+        }
+      } catch (err) {
+        alert('連線錯誤，請確認 GAS 是否已部署為「任何人」皆可存取。');
+      }
+    };
+
+    // ... 其餘渲染邏輯 renderRacks, openModal, closeModal 保持不變 ...
+  </script>
+</body>
+
+</html>
