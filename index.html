@@ -340,13 +340,10 @@
     async function fetchData() {
       document.getElementById('loadingStatus').textContent = '同步中...';
       try {
-        const response = await fetch(`${API_URL}?action=getInventory`, {
-          method: 'GET',
-          mode: 'cors', // 強制開啟 CORS 模式
-          redirect: 'follow'
-        });
+        // 使用最簡單的 fetch，不加 mode，讓瀏覽器自動處理
+        const response = await fetch(`${API_URL}?action=getInventory`);
         
-        if (!response.ok) throw new Error('網路回應不正常');
+        if (!response.ok) throw new Error('HTTP 錯誤: ' + response.status);
         
         inventory = await response.json();
         renderRacks();
@@ -356,12 +353,13 @@
         console.error('讀取失敗:', err);
         document.getElementById('loadingStatus').textContent = '連線失敗';
         
-        // 提示使用者
-        if (location.protocol === 'file:') {
-          alert('偵測到您是直接開啟本地檔案。請將網頁上傳到 GitHub 或使用 Web Server (如 Live Server) 執行，否則瀏覽器會阻擋連線。');
-        } else {
-          alert('連線失敗，請檢查 GAS 部署是否正確設定為「任何人 (Anyone)」。');
-        }
+        // 直接把錯誤寫在畫面上給我看
+        document.getElementById('loader').innerHTML = 
+          `<div style="color:red; padding:20px;">
+            <h3>連線失敗詳細資訊：</h3>
+            <p>${err.message}</p>
+            <p>請確認 GAS 是否已部署為「任何人」並重新整理網頁。</p>
+          </div>`;
       }
     }
 
