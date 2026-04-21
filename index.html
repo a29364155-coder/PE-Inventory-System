@@ -248,8 +248,8 @@
     .item-name { font-size: 13px; font-weight: 400; text-align: center; color: var(--text-main); }
     .item-qty { font-size: 11px; color: var(--accent-gold); margin-top: 2px; }
 
-    /* 編輯彈窗 */
-    #modalOverlay {
+    /* 彈窗樣式 (通用) */
+    .modal-overlay {
       display: none;
       position: fixed;
       top: 0; left: 0; width: 100%; height: 100%;
@@ -273,6 +273,17 @@
     .form-group { margin-bottom: 15px; }
     label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
     select, input, textarea { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
+    
+    /* 修正深色模式下的日期與時間圖示 */
+    input[type="date"], input[type="time"] {
+      color-scheme: dark;
+    }
+    input[type="date"]::-webkit-calendar-picker-indicator,
+    input[type="time"]::-webkit-calendar-picker-indicator {
+      filter: invert(1);
+      cursor: pointer;
+    }
+
     textarea { height: 150px; resize: vertical; line-height: 1.5; }
     .btn-group { display: flex; gap: 10px; margin-top: 20px; }
     button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
@@ -319,10 +330,17 @@
         letter-spacing: 1.5px;
         font-weight: 500;
       }
+    .stat-card.alert { 
+      background: rgba(231, 76, 60, 0.1); 
+      border-color: rgba(231, 76, 60, 0.5); 
+    }
+    .stat-card.alert .stat-value { color: #ff6666; }
+    .stat-card.pulse { animation: pulse-red 2s infinite; }
+
     @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
+      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
+      70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
+      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
     }
     /* 列印專用樣式 - 修正版 */
     @media print {
@@ -485,8 +503,9 @@
       </div>
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
         <span id="adminStatus" onclick="toggleAdmin()" class="status-badge" style="cursor:pointer; border:1px solid #444; font-size:11px;">🔒 管理員登入</span>
+        <button onclick="openBorrowModal()" class="status-badge" style="background:rgba(52,152,219,0.2); color:#3498db; cursor:pointer; font-weight:bold; border:1px solid rgba(52,152,219,0.3);">📦 借用登記</button>
         <button onclick="openRepairModal()" class="status-badge" style="background:rgba(255,68,68,0.2); color:#ff6666; cursor:pointer; font-weight:bold; border:1px solid rgba(255,68,68,0.3);">🛠️ 報修登記</button>
-        <button onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印標籤</button>
+        <button id="btnPrintLabels" onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印標籤</button>
         <div id="loadingStatus" class="status-badge">同步中...</div>
       </div>
     </div>
@@ -534,7 +553,7 @@
   </footer>
 
   <!-- 編輯彈窗 -->
-  <div id="modalOverlay">
+  <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
       <div id="modalTitle" class="modal-title">位置編輯</div>
       
@@ -618,6 +637,99 @@
     </div>
   </div>
 
+  <!-- 器材借用中心 Modal -->
+  <div id="borrowModal" class="modal-overlay" style="display:none;">
+    <div class="modal" style="width: 400px; max-width: 90vw;">
+      <div class="modal-title">📦 器材借用中心</div>
+      
+      <div class="modal-tabs">
+        <div class="tab active" onclick="switchBorrowTab('form')">📄 我要借用</div>
+        <div class="tab" onclick="switchBorrowTab('pending')">⌛ 借用中</div>
+        <div class="tab" onclick="switchBorrowTab('history')">📜 歷史紀錄</div>
+      </div>
+
+      <!-- 借用表單 -->
+      <div id="borrowForm">
+        <!-- 第一組 -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 2.5;">
+            <label>借用器材 (1)</label>
+            <select id="borrowEquipSelect1"></select>
+          </div>
+          <div style="flex: 1;">
+            <label>數量</label>
+            <input type="number" id="borrowQty1" value="1" min="1">
+          </div>
+        </div>
+        <!-- 第二組 -->
+        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+          <div style="flex: 2.5;">
+            <label>借用器材 (2)</label>
+            <select id="borrowEquipSelect2"></select>
+          </div>
+          <div style="flex: 1;">
+            <label>數量</label>
+            <input type="number" id="borrowQty2" value="0" min="0">
+          </div>
+        </div>
+        <!-- 第三組 -->
+        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+          <div style="flex: 2.5;">
+            <label>借用器材 (3)</label>
+            <select id="borrowEquipSelect3"></select>
+          </div>
+          <div style="flex: 1;">
+            <label>數量</label>
+            <input type="number" id="borrowQty3" value="0" min="0">
+          </div>
+        </div>
+        <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
+          <div style="flex: 1.5;">
+            <label>借用日期</label>
+            <input type="date" id="borrowDate">
+          </div>
+          <div style="flex: 1;">
+            <label>起始時間</label>
+            <input type="time" id="borrowStartTime">
+          </div>
+          <div style="color: #555; padding-bottom: 10px;">~</div>
+          <div style="flex: 1;">
+            <label>結束時間</label>
+            <input type="time" id="borrowEndTime">
+          </div>
+        </div>
+        <div class="form-group">
+          <label>借用人姓名</label>
+          <input type="text" id="borrowTeacher" placeholder="例如：王小明 老師">
+        </div>
+        <div class="form-group">
+          <label>班級 / 用途</label>
+          <input type="text" id="borrowClass" placeholder="例如：610 綜合課教學用">
+        </div>
+        <div class="btn-group">
+          <button type="button" class="btn-cancel" onclick="closeBorrowModal()">取消</button>
+          <button type="button" onclick="submitBorrow()" class="btn-save" style="background:#3498db; color:#fff;">送出借用</button>
+        </div>
+      </div>
+
+      <!-- 借用中清單 -->
+      <div id="borrowPending" style="display:none;">
+        <div id="borrowPendingList" style="max-height: 400px; overflow-y: auto;"></div>
+        <div class="btn-group" style="margin-top: 15px;">
+          <button type="button" class="btn-cancel" style="width:100%;" onclick="closeBorrowModal()">關閉</button>
+        </div>
+      </div>
+
+      <!-- 歷史紀錄 -->
+      <div id="borrowHistory" style="display:none;">
+        <div id="borrowHistoryList" style="max-height: 400px; overflow-y: auto;"></div>
+        <div class="btn-group" style="margin-top: 15px;">
+          <button type="button" class="btn-cancel" style="width:100%;" onclick="closeBorrowModal()">關閉</button>
+        </div>
+      </div>
+    </div>
+  </div>
+
   <script>
     const API_URL = 'https://script.google.com/macros/s/AKfycbzkPjn7eBoY1UTTEH_ZIUHEbCctP5Nv_ED_0ZZnXe9S6LVY0k85BjJ7nLP83UHdJaCi/exec';
 
@@ -628,6 +740,17 @@
       fetchData();
       fetchEquipmentList();
       fetchRepairData();
+      
+      // 檢查是否為掃碼歸還模式
+      const urlParams = new URLSearchParams(window.location.search);
+      const token = urlParams.get('token');
+      if (token === 'BUZI_RETURN_KEY') {
+        localStorage.setItem('returnToken', token);
+        setTimeout(() => {
+          openBorrowModal();
+          switchBorrowTab('pending');
+        }, 1500); // 稍微延遲等資料載入
+      }
     };
 
     async function fetchData() {
@@ -679,8 +802,11 @@
       const container = document.getElementById('racksContainer');
       container.innerHTML = '';
       
-      const totalSlots = inventory.filter(d => !d.Status.includes('被') && d.Status !== '停用中' && d.Rack_ID !== 'SPARE').length;
-      const occupied = inventory.filter(d => d.Equipment_Name && !d.Status.includes('被') && d.Status !== '停用中' && d.Rack_ID !== 'SPARE').length;
+      // 空間使用率僅計算 A, B, C, D, E 區域
+      // 使用更寬鬆的判斷，防止因為 "A區" 或 "A-1" 導致抓不到
+      const statsPool = inventory.filter(d => /^[ABCDE]/i.test(d.Rack_ID));
+      const totalSlots = statsPool.filter(d => !d.Status.includes('被') && d.Status !== '停用中').length;
+      const occupied = statsPool.filter(d => d.Equipment_Name && !d.Status.includes('被') && d.Status !== '停用中').length;
       const totals = {};
       inventory.forEach(d => {
         if (d.Equipment_Name) totals[d.Equipment_Name] = (totals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
@@ -701,7 +827,9 @@
 
       document.getElementById('statOccupied').textContent = occupied;
       document.getElementById('statTotalItems').textContent = totalQty;
-      document.getElementById('statSpace').textContent = ((occupied / totalSlots) * 100).toFixed(1) + '%';
+      
+      const usagePercent = totalSlots > 0 ? ((occupied / totalSlots) * 100).toFixed(1) : 0;
+      document.getElementById('statSpace').textContent = usagePercent + '%';
       
       const alertVal = document.getElementById('statAlert');
       const alertCard = document.getElementById('alertCard');
@@ -725,8 +853,17 @@
       });
 
       rackIds.forEach(rackId => {
+        const isAdmin = !!localStorage.getItem('adminPIN');
+        // 如果是備品區且不是管理員，則跳過不顯示
+        if (rackId === "備品區" && !isAdmin) return;
+
         const card = document.createElement('div');
         card.className = 'rack-card';
+        
+        // 橫跨所有欄位
+        if (rackId === "備品區" || rackId === "其他器材") {
+          card.style.gridColumn = '1 / -1';
+        }
         
         // 特殊處理備品區與其他器材標題
         const isInventoryMode = rackId === "備品區" || rackId === "其他器材";
@@ -848,17 +985,25 @@
       });
     }
 
+    function closeModal() {
+      document.getElementById('modalOverlay').style.display = 'none';
+    }
+
+    // 輔助函數：開啟彈窗前先清空所有區域
+    function hideAllModalSections() {
+      const sections = ['editForm', 'detailContent', 'repairTabs', 'repairForm', 'repairHistory', 'spareForm', 'repairPendingModal'];
+      sections.forEach(id => {
+        const el = document.getElementById(id);
+        if (el) el.style.display = 'none';
+      });
+    }
+
     function openModal(data) {
+      hideAllModalSections();
       const isAdmin = !!localStorage.getItem('adminPIN');
       const isDisabled = data.Status === "停用中";
       
-      // 切換回編輯模式，並隱藏維修相關元件
       document.getElementById('editForm').style.display = 'block';
-      document.getElementById('detailContent').style.display = 'none';
-      document.getElementById('repairTabs').style.display = 'none';
-      document.getElementById('repairForm').style.display = 'none';
-      document.getElementById('repairHistory').style.display = 'none';
-
       document.getElementById('editSlotId').value = data.Slot_ID;
       document.getElementById('editRackId').value = data.Rack_ID;
       document.getElementById('editLevel').value = data.Level;
@@ -872,7 +1017,6 @@
       document.getElementById('sizeSelect').value = data.Basket_Size || '小';
       document.getElementById('noteInput').value = data.Note || '';
       
-      // 權限控制：非管理員 或 停用中 則禁用輸入
       const shouldDisableInput = !isAdmin || isDisabled;
       document.getElementById('equipSelect').disabled = shouldDisableInput;
       document.getElementById('qtyInput').disabled = shouldDisableInput;
@@ -882,7 +1026,6 @@
       document.getElementById('adminButtons').style.display = isAdmin ? 'flex' : 'none';
       document.getElementById('guestButtons').style.display = isAdmin ? 'none' : 'flex';
       
-      // 更新停用按鈕文字
       const btnToggle = document.getElementById('btnToggleDisable');
       if (btnToggle) {
         btnToggle.textContent = isDisabled ? '啟用此格' : '停用此格';
@@ -895,13 +1038,8 @@
       document.getElementById('modalOverlay').style.display = 'flex';
     }
 
-    function closeModal() {
-      document.getElementById('modalOverlay').style.display = 'none';
-      document.getElementById('repairTabs').style.display = 'none'; // 關閉時重置
-    }
-
     function showEquipmentDetail() {
-      document.getElementById('editForm').style.display = 'none';
+      hideAllModalSections();
       document.getElementById('detailContent').style.display = 'block';
       
       const rackTotals = {};
@@ -945,7 +1083,7 @@
     }
 
     function showRestockDetail() {
-      document.getElementById('editForm').style.display = 'none';
+      hideAllModalSections();
       document.getElementById('detailContent').style.display = 'block';
       
       const rackTotals = {};
@@ -1103,7 +1241,10 @@
               <h4>${item.Equipment} x ${item.Quantity}</h4>
               <p>${item.Note || '無描述'} (${item.Reporter || '匿名'})</p>
             </div>
-            ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
+            ${isAdmin 
+              ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` 
+              : `<span style="font-size: 11px; color: #ff8888; border: 1px solid rgba(255,136,136,0.3); padding: 4px 10px; border-radius: 4px;">待修復</span>`
+            }
           </div>
         `).join('');
       } catch (e) { list.innerHTML = '讀取失敗'; }
@@ -1301,10 +1442,250 @@
           qty: qty,
           password: localStorage.getItem('adminPIN')
         }) });
-        fetchData();
       } catch (err) { alert('更新失敗'); }
     };
 
+    updateAdminUI();
+
+    // --- 借用管理功能 ---
+    function openBorrowModal() {
+      document.getElementById('borrowModal').style.display = 'flex';
+      switchBorrowTab('form');
+      
+      // 初始化器材下拉選單 (三組)
+      for (let i = 1; i <= 3; i++) {
+        const select = document.getElementById(`borrowEquipSelect${i}`);
+        select.innerHTML = '<option value="">(無)</option>';
+        equipmentList.forEach(item => {
+          const opt = document.createElement('option');
+          opt.value = item.name;
+          opt.textContent = item.name;
+          select.appendChild(opt);
+        });
+        // 重設數量
+        document.getElementById(`borrowQty${i}`).value = (i === 1 ? 1 : 0);
+      }
+
+      // 預設填入目前日期與時間
+      const now = new Date();
+      document.getElementById('borrowDate').value = now.toISOString().split('T')[0];
+      document.getElementById('borrowStartTime').value = now.toTimeString().slice(0,5);
+      
+      // 預設結束時間為 40 分鐘後 (一節課)
+      const endTime = new Date(now.getTime() + 40 * 60000);
+      document.getElementById('borrowEndTime').value = endTime.toTimeString().slice(0,5);
+    }
+
+    function closeBorrowModal() {
+      document.getElementById('borrowModal').style.display = 'none';
+    }
+
+    function switchBorrowTab(type) {
+      const tabs = document.querySelectorAll('#borrowModal .tab');
+      tabs[0].classList.toggle('active', type === 'form');
+      tabs[1].classList.toggle('active', type === 'pending');
+      tabs[2].classList.toggle('active', type === 'history');
+      
+      document.getElementById('borrowForm').style.display = type === 'form' ? 'block' : 'none';
+      document.getElementById('borrowPending').style.display = type === 'pending' ? 'block' : 'none';
+      document.getElementById('borrowHistory').style.display = type === 'history' ? 'block' : 'none';
+      
+      if (type === 'pending') fetchBorrowPending();
+      if (type === 'history') fetchBorrowHistory();
+    }
+
+    async function submitBorrow() {
+      const btn = event.target;
+      const originalText = btn.textContent;
+      const teacher = document.getElementById('borrowTeacher').value;
+      const className = document.getElementById('borrowClass').value;
+      const bDate = document.getElementById('borrowDate').value;
+      const sTime = document.getElementById('borrowStartTime').value;
+      const eTime = document.getElementById('borrowEndTime').value;
+
+      if (!teacher) { alert("請填寫借用人姓名"); return; }
+
+      const items = [];
+      for (let i = 1; i <= 3; i++) {
+        const equip = document.getElementById(`borrowEquipSelect${i}`).value;
+        const qty = document.getElementById(`borrowQty${i}`).value;
+        if (equip && qty > 0) {
+          items.push({ equipment: equip, qty: qty });
+        }
+      }
+
+      if (items.length === 0) { alert("請至少選擇一項器材與數量"); return; }
+
+      // 鎖定按鈕防止重複點擊
+      btn.disabled = true;
+      btn.textContent = "處理中...";
+
+      try {
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({
+            action: 'submitBorrow',
+            items: items,
+            teacher: teacher,
+            class: className,
+            borrowTime: `${bDate} ${sTime} ~ ${eTime}`
+          })
+        });
+        
+        alert("登記成功！");
+        document.getElementById('borrowTeacher').value = "";
+        document.getElementById('borrowClass').value = "";
+        switchBorrowTab('pending');
+      } catch (e) { 
+        alert("提交失敗"); 
+      } finally {
+        btn.disabled = false;
+        btn.textContent = originalText;
+      }
+    }
+
+    // 輔助函式：格式化借用時間
+    function formatBorrowTime(rawStr, rangeStr) {
+      // 優先使用專屬時段欄位 (Borrow_Range)
+      if (rangeStr) {
+        try {
+          const parts = rangeStr.split(' '); // [2026-04-22, 08:00, ~, 08:40]
+          const d = new Date(parts[0]);
+          const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+          const dayOfWeek = weekdays[d.getDay()];
+          const y = d.getFullYear();
+          const m = String(d.getMonth() + 1).padStart(2, '0');
+          const day = String(d.getDate()).padStart(2, '0');
+          const timeRange = parts.slice(1).join(''); // 08:00~08:40
+          return `${y}/${m}/${day}(${dayOfWeek})${timeRange}`;
+        } catch(e) { return rangeStr; }
+      }
+
+      if (!rawStr) return "無紀錄";
+      try {
+        const dateObj = new Date(rawStr);
+        if (isNaN(dateObj.getTime())) return rawStr;
+        
+        const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
+        const dayOfWeek = weekdays[dateObj.getDay()];
+        const y = dateObj.getFullYear();
+        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
+        const d = String(dateObj.getDate()).padStart(2, '0');
+        const hh = String(dateObj.getHours()).padStart(2, '0');
+        const mm = String(dateObj.getMinutes()).padStart(2, '0');
+        
+        return `${y}/${m}/${d}(${dayOfWeek})${hh}:${mm}`;
+      } catch (e) { return rawStr; }
+    }
+
+    async function fetchBorrowPending() {
+      const list = document.getElementById('borrowPendingList');
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      const hasReturnToken = localStorage.getItem('returnToken') === 'BUZI_RETURN_KEY';
+      
+      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">讀取中...</div>';
+      try {
+        const response = await fetch(`${API_URL}?action=getBorrow&type=pending`);
+        const data = await response.json();
+        
+        if (!data || data.length === 0) {
+          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前無借用中項目</div>';
+          return;
+        }
+        
+        list.innerHTML = data.map(item => `
+          <div class="repair-item" style="margin-bottom:10px; border:1px solid #333; padding:12px; border-radius:8px;">
+            <div class="repair-info">
+              <h4 style="color:var(--accent-gold); margin:0 0 5px 0;">${item.Equipment} x ${item.Quantity}</h4>
+              <p style="margin:2px 0;">${item.Teacher} (${item.Class || '無'})</p>
+              <p style="font-size:10px; opacity:0.5; margin-top:5px;">借用時間: ${formatBorrowTime(item.Timestamp, item.Borrow_Range)}</p>
+            </div>
+            ${(isAdmin || hasReturnToken) ? `<button class="btn-resolve" onclick="returnBorrow(${item.id})">確認歸還</button>` : 
+                        `<span style="font-size: 11px; color: #3498db; border: 1px solid rgba(52,152,219,0.3); padding: 4px 10px; border-radius: 4px;">借用中</span>`}
+          </div>
+        `).join('');
+      } catch (e) { list.innerHTML = '讀取失敗'; }
+    }
+
+    async function returnBorrow(id) {
+      if (!confirm("確認此器材已歸還？")) return;
+      try {
+        const pwd = localStorage.getItem('adminPIN');
+        const token = localStorage.getItem('returnToken');
+        
+        await fetch(API_URL, {
+          method: 'POST',
+          body: JSON.stringify({ 
+            action: 'returnBorrow', 
+            borrowId: id, 
+            password: pwd,
+            token: token
+          })
+        });
+        fetchBorrowPending();
+      } catch (e) { alert("操作失敗"); }
+    }
+
+    async function fetchBorrowHistory() {
+      const list = document.getElementById('borrowHistoryList');
+      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">讀取中...</div>';
+      try {
+        const response = await fetch(`${API_URL}?action=getBorrow&type=history`);
+        const data = await response.json();
+        
+        list.innerHTML = data.map(item => `
+          <div class="history-item" style="margin-bottom:10px; padding:10px; border-bottom:1px solid #222;">
+            <div class="history-status" style="background:#27ae60; padding:2px 6px; border-radius:4px; font-size:10px; margin-bottom:5px; display:inline-block;">已歸還</div>
+            <div class="history-main">
+              <strong style="display:block; margin-bottom:3px;">${item.Equipment} x ${item.Quantity}</strong>
+              <div style="font-size:11px; opacity:0.7;">借用人: ${item.Teacher} | 班級: ${item.Class || '無'}</div>
+              <div style="font-size:10px; margin-top:4px; opacity:0.5;">
+                借用時間: ${formatBorrowTime(item.Timestamp, item.Borrow_Range)}<br>
+                歸還時間: ${formatBorrowTime(item.Returned_At)}
+              </div>
+            </div>
+          </div>
+        `).join('');
+      } catch (e) { list.innerHTML = '讀取失敗'; }
+    }
+    function toggleAdmin() {
+      const current = localStorage.getItem('adminPIN');
+      if (current) {
+        if (confirm('是否登出管理員模式？')) {
+          localStorage.removeItem('adminPIN');
+          updateAdminUI();
+          renderRacks();
+        }
+      } else {
+        const pin = prompt('請輸入管理員密碼:');
+        if (pin === '1234') { // 這裡應與 Code.gs 一致
+          localStorage.setItem('adminPIN', pin);
+          updateAdminUI();
+          renderRacks();
+        } else if (pin !== null) {
+          alert('密碼錯誤');
+        }
+      }
+    }
+
+    function updateAdminUI() {
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      const statusEl = document.getElementById('adminStatus');
+      if (statusEl) {
+        statusEl.textContent = isAdmin ? '🔓 已進入管理模式 (點擊登出)' : '🔒 管理員登入';
+        statusEl.style.background = isAdmin ? 'var(--accent-gold)' : 'transparent';
+        statusEl.style.color = isAdmin ? '#000' : 'var(--text-dim)';
+      }
+      
+      // 控制管理員專屬按鈕與統計卡片
+      const printBtn = document.getElementById('btnPrintLabels');
+      if (printBtn) printBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+      
+      const alertCard = document.getElementById('alertCard');
+      if (alertCard) alertCard.style.display = isAdmin ? 'flex' : 'none';
+    }
+
+    // 初始化介面
     updateAdminUI();
   </script>
 </body>
