@@ -267,7 +267,11 @@
     textarea { height: 150px; resize: vertical; line-height: 1.5; }
     .btn-group { display: flex; gap: 10px; margin-top: 20px; }
     button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
-    .btn-save { background: var(--accent-gold); color: #000; }
+    .slot.disabled { background: #333; border-color: #444; cursor: not-allowed; }
+    .slot.disabled .item-name { color: #666; }
+    .slot.disabled .item-qty { color: #555; }
+    .btn-disable { background: #444; color: #fff; }
+    .btn-disable:hover { background: #555; }
     .btn-cancel { background: #444; color: #fff; }
     .btn-delete { background: #e74c3c; color: #fff; border: none; }
     .btn-delete:hover { background: #c0392b; }
@@ -415,6 +419,7 @@
         <div class="form-group"><label>備註內容 (如顏色、尺寸、細項)</label><textarea id="noteInput" placeholder="例如：&#10;紅*10, 藍*5&#10;特大號*2"></textarea></div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="button" class="btn-disable" onclick="disableThisSlot()">🚫 停用此格</button>
           <button type="button" class="btn-delete" onclick="clearThisSlot()">清空此格</button>
           <button type="submit" class="btn-save">儲存更新</button>
         </div>
@@ -571,20 +576,23 @@
           const levelData = rackData.filter(d => d.Level == l);
           
           for (let b = 1; b <= 4; b++) {
-            const slotData = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
-            if (!slotData || (slotData.Status && slotData.Status.includes('被'))) continue;
+            const slot = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
+            if (!slot) continue;
             
+            const isOccupied = slot.Status && slot.Status.includes('被');
+            const isDisabled = slot.Status === "停用";
+            if (isOccupied) continue;
+
             const slotDiv = document.createElement('div');
-            slotDiv.className = 'slot';
-            if (slotData.Basket_Size === '大') slotDiv.classList.add('big');
-            if (slotData.Equipment_Name) slotDiv.classList.add('has-item');
+            slotDiv.className = `slot ${slot.Equipment_Name ? 'has-item' : ''} ${isDisabled ? 'disabled' : ''}`;
+            if (slot.Basket_Size === '大') slotDiv.classList.add('big');
             
             slotDiv.innerHTML = `
-              <div class="slot-id">${slotData.Slot_ID}</div>
-              <div class="item-name">${slotData.Equipment_Name || ''}</div>
-              <div class="item-qty">${slotData.Quantity > 0 ? slotData.Quantity : ''}</div>
+              <div class="slot-id">${slot.Slot_ID}</div>
+              <div class="item-name">${isDisabled ? '🚫 停用' : (slot.Equipment_Name || '')}</div>
+              <div class="item-qty">${isDisabled ? '' : (slot.Equipment_Name ? (slot.Quantity || 0) : '')}</div>
             `;
-            slotDiv.onclick = () => openModal(slotData);
+            slotDiv.onclick = () => openModal(slot);
             slotsRow.appendChild(slotDiv);
           }
           levelRow.appendChild(slotsRow);
@@ -604,9 +612,19 @@
       document.getElementById('editLevel').value = data.Level;
       document.getElementById('modalTitle').textContent = `編輯位置: ${data.Slot_ID}`;
       document.getElementById('equipSelect').value = data.Equipment_Name || '';
-      document.getElementById('qtyInput').value = data.Quantity || 0;
       document.getElementById('sizeSelect').value = data.Basket_Size || '小';
       document.getElementById('noteInput').value = data.Note || '';
+      
+      const disableBtn = document.querySelector('.btn-disable');
+      if (data.Status === '停用') {
+        disableBtn.innerHTML = '✅ 啟用此格';
+        disableBtn.style.background = '#27ae60';
+        disableBtn.onclick = enableThisSlot;
+      } else {
+        disableBtn.innerHTML = '🚫 停用此格';
+        disableBtn.style.background = '#444';
+        disableBtn.onclick = disableThisSlot;
+      }
       
       const slotNum = parseInt(data.Slot_ID.split('-').pop());
       document.getElementById('sizeSelect').disabled = (slotNum === 4);
@@ -711,7 +729,44 @@
       document.getElementById('modalOverlay').style.display = 'flex';
     }
 
-    async function clearThisSlot() {
+    async function disableThisSlot() {
+      if (!confirm("確定要停用此格位嗎？")) return;
+      const payload = {
+        action: 'disable',
+        slotId: document.getElementById('editSlotId').value,
+        rackId: document.getElementById('editRackId').value,
+        level: parseInt(document.getElementById('editLevel').value),
+        equipment: "",
+        qty: 0,
+        size: document.getElementById('sizeSelect').value,
+        note: "格位已停用",
+        operator: 'GitHub 網頁端'
+      };
+      closeModal();
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        fetchData();
+      } catch (err) { alert('操作失敗'); }
+    }
+
+    async function enableThisSlot() {
+      const payload = {
+        action: 'enable',
+        slotId: document.getElementById('editSlotId').value,
+        rackId: document.getElementById('editRackId').value,
+        level: parseInt(document.getElementById('editLevel').value),
+        equipment: "",
+        qty: 0,
+        size: document.getElementById('sizeSelect').value,
+        note: "",
+        operator: 'GitHub 網頁端'
+      };
+      closeModal();
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        fetchData();
+      } catch (err) { alert('操作失敗'); }
+    }
       if (!confirm('確定要清空這個格子的所有資料嗎？')) return;
       document.getElementById('equipSelect').value = '';
       document.getElementById('qtyInput').value = 0;
