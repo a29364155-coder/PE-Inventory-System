@@ -263,7 +263,8 @@
     .modal-title { font-size: 18px; color: var(--accent-gold); margin-bottom: 20px; text-align: center; }
     .form-group { margin-bottom: 15px; }
     label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
-    select, input { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; }
+    select, input, textarea { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
+    textarea { height: 150px; resize: vertical; line-height: 1.5; }
     .btn-group { display: flex; gap: 10px; margin-top: 20px; }
     button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
     .btn-save { background: var(--accent-gold); color: #000; }
@@ -305,6 +306,44 @@
       70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
       100% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0); }
     }
+    /* 列印專用樣式 - 修正版 */
+    @media print {
+      body > *:not(#printArea) { display: none !important; }
+      #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; }
+      .print-page { 
+        page-break-after: always; 
+        padding: 20px; 
+        border: 4px solid #000 !important; 
+        margin-bottom: 20px; 
+        color: #000 !important; 
+        background: #fff !important;
+        -webkit-print-color-adjust: exact;
+        print-color-adjust: exact;
+      }
+      .print-title { font-size: 48px; font-weight: 700; text-align: center; margin-bottom: 30px; border: 4px solid #000; padding: 10px; }
+      .print-grid { 
+        display: grid; 
+        grid-template-columns: repeat(4, 1fr); 
+        grid-template-rows: repeat(3, 1fr); 
+        gap: 10px; 
+        height: 80vh;
+      }
+      .print-slot { 
+        border: 2px solid #000 !important; 
+        border-radius: 15px; 
+        display: flex; 
+        flex-direction: column; 
+        justify-content: center; 
+        align-items: center; 
+        text-align: center; 
+        padding: 5px;
+        overflow: hidden;
+      }
+      .print-slot.big { grid-column: span 2; }
+      .print-item-name { font-size: 24px; font-weight: 700; color: #000 !important; }
+      .print-item-note { font-size: 14px; margin-top: 5px; color: #333 !important; line-height: 1.2; }
+    }
+    #printArea { display: none; }
   </style>
 </head>
 <body>
@@ -327,7 +366,10 @@
         </div>
         <div class="sub-title">及時監測體育器材庫存與擺放位置</div>
       </div>
-      <div id="loadingStatus" class="status-badge">同步中...</div>
+      <div style="display: flex; gap: 10px; align-items: center;">
+        <button onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印架位標籤</button>
+        <div id="loadingStatus" class="status-badge">同步中...</div>
+      </div>
     </div>
   </header>
 
@@ -353,6 +395,9 @@
 
   <div id="loader">載入中...</div>
   <div id="racksContainer" class="racks-container"></div>
+  
+  <!-- 隱藏的列印區 -->
+  <div id="printArea"></div>
 
   <!-- 編輯彈窗 -->
   <div id="modalOverlay">
@@ -367,6 +412,7 @@
         <div class="form-group"><label>器材名稱</label><select id="equipSelect"><option value="">(空)</option></select></div>
         <div class="form-group"><label>數量</label><input type="number" id="qtyInput" min="0" value="0"></div>
         <div class="form-group"><label>籃子大小</label><select id="sizeSelect"><option value="小">小籃子 (1格)</option><option value="大">大籃子 (2格 / 固定向右合併)</option></select></div>
+        <div class="form-group"><label>備註內容 (如顏色、尺寸、細項)</label><textarea id="noteInput" placeholder="例如：&#10;紅*10, 藍*5&#10;特大號*2"></textarea></div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
           <button type="button" class="btn-delete" onclick="clearThisSlot()">清空此格</button>
@@ -470,6 +516,7 @@
       const rackIds = [...new Set(inventory.map(item => item.Rack_ID))].sort((a, b) => {
         const order = (name) => {
           if (name === "備品區") return 999;
+          if (name === "其他器材") return 998;
           if (name.includes("樂活教室")) return 900 + (name.includes("B") ? 1 : 0);
           return name.charCodeAt(0); // A-G 會按字母順序
         };
@@ -480,29 +527,23 @@
         const card = document.createElement('div');
         card.className = 'rack-card';
         
-        // 特殊處理備品區標題
-        const isSpares = rackId === "備品區";
-        const displayTitle = isSpares ? "備品區 (庫存快速管理)" : rackId;
-        let html = `<div class="rack-header">架位 ${displayTitle}</div>`;
+        // 特殊處理備品區與其他器材標題
+        const isInventoryMode = rackId === "備品區" || rackId === "其他器材";
+        const displayTitle = rackId;
+        let html = `<div class="rack-header">區域 ${displayTitle}</div>`;
         
-        if (isSpares) {
-          // --- 備品區專用：器材庫存清單模式 ---
+        if (isInventoryMode) {
+          // --- 庫存清單模式 ---
           html += `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:8px; padding:10px;">`;
           
-          equipmentList.forEach((item, index) => {
-            // 尋找此器材在備品區的對應格位（若無則分配一個空的）
-            let slot = inventory.find(d => d.Rack_ID === "備品區" && d.Equipment_Name === item.name);
-            if (!slot) {
-               // 如果沒找到，就分配一個編號對應的格位 (例如 index 0 對應備品區-L1-1)
-               const spareSlots = inventory.filter(d => d.Rack_ID === "備品區");
-               slot = spareSlots[index] || spareSlots[0];
-            }
-            
-            const currentQty = (slot && slot.Equipment_Name === item.name) ? slot.Quantity : 0;
+          const areaSlots = inventory.filter(d => d.Rack_ID === rackId);
+          areaSlots.forEach((slot, index) => {
+            const currentQty = slot.Quantity || 0;
+            const itemName = slot.Equipment_Name || `(格位 ${index + 1})`;
             
             html += `
-              <div class="slot has-item" style="height:70px;" onclick="openModal('${slot.Slot_ID}', '備品區', ${slot.Level}, '${item.name}', ${currentQty}, '小')">
-                <div class="item-name" style="font-size:12px;">${item.name}</div>
+              <div class="slot ${slot.Equipment_Name ? 'has-item' : ''}" style="height:70px;" onclick="openModal(${JSON.stringify(slot).replace(/"/g, '&quot;')})">
+                <div class="item-name" style="font-size:12px;">${itemName}</div>
                 <div class="item-qty" style="font-size:16px; font-weight:700;">${currentQty}</div>
               </div>`;
           });
@@ -565,9 +606,10 @@
       document.getElementById('equipSelect').value = data.Equipment_Name || '';
       document.getElementById('qtyInput').value = data.Quantity || 0;
       document.getElementById('sizeSelect').value = data.Basket_Size || '小';
+      document.getElementById('noteInput').value = data.Note || '';
       
       const slotNum = parseInt(data.Slot_ID.split('-').pop());
-      document.getElementById('sizeSelect').disabled = (slotNum % 2 === 0);
+      document.getElementById('sizeSelect').disabled = (slotNum === 4);
       document.getElementById('modalOverlay').style.display = 'flex';
     }
 
@@ -696,6 +738,7 @@
         equipment: document.getElementById('equipSelect').value,
         qty: parseInt(document.getElementById('qtyInput').value),
         size: document.getElementById('sizeSelect').value,
+        note: document.getElementById('noteInput').value,
         operator: 'GitHub 網頁端'
       };
       closeModal();
@@ -704,6 +747,59 @@
         fetchData();
       } catch (err) { alert('更新失敗'); }
     };
+
+    function generatePrintLabels() {
+      const printArea = document.getElementById('printArea');
+      printArea.innerHTML = '';
+      
+      const rackIds = [...new Set(inventory.map(item => item.Rack_ID))].sort();
+      
+      rackIds.forEach(rackId => {
+        if (rackId === "備品區" || rackId === "其他器材") return;
+        
+        const rackData = inventory.filter(d => d.Rack_ID === rackId);
+        
+        const page = document.createElement('div');
+        page.className = 'print-page';
+        page.innerHTML = `<div class="print-title">架位 ${rackId}</div>`;
+        
+        const grid = document.createElement('div');
+        grid.className = 'print-grid';
+        
+        // 依照 PDF 樣式與實體架位：Level 3 在上，Level 1 在下
+        for (let l = 3; l >= 1; l--) {
+          for (let s = 1; s <= 4; s++) {
+            const slot = rackData.find(d => d.Level == l && d.Slot_ID.endsWith(`-${s}`));
+            if (!slot) {
+              const emptyDiv = document.createElement('div');
+              emptyDiv.className = 'print-slot';
+              grid.appendChild(emptyDiv);
+              continue;
+            }
+            
+            // 跳過被合併的格子
+            if (slot.Status && slot.Status.includes('被')) continue;
+            
+            const slotDiv = document.createElement('div');
+            slotDiv.className = 'print-slot';
+            if (slot.Basket_Size === '大') slotDiv.classList.add('big');
+            
+            slotDiv.innerHTML = `
+              <div class="print-item-name">${slot.Equipment_Name || ''}</div>
+              <div class="print-item-note">${slot.Note || ''}</div>
+            `;
+            grid.appendChild(slotDiv);
+          }
+        }
+        page.appendChild(grid);
+        printArea.appendChild(page);
+      });
+      
+      // 給瀏覽器一點時間渲染內容後再列印
+      setTimeout(() => {
+        window.print();
+      }, 500);
+    }
   </script>
 </body>
 </html>
