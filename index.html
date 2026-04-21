@@ -50,7 +50,7 @@
     }
 
     .school-name-zh {
-      font-size: 18px;
+      font-size: clamp(14px, 4vw, 18px);
       font-weight: 600;
       letter-spacing: 1px;
       color: #fff;
@@ -67,15 +67,17 @@
     .main-title-area {
       display: flex;
       justify-content: space-between;
-      align-items: center; /* 讓右邊標籤居中對齊 */
+      align-items: flex-end;
+      flex-wrap: wrap;
+      gap: 15px;
       margin-bottom: 20px;
     }
 
     .title-container h1 {
       margin: 0;
-      font-size: 42px;
+      font-size: clamp(32px, 8vw, 64px);
       font-weight: 700;
-      letter-spacing: 4px;
+      letter-spacing: 2px;
       color: #fff;
       line-height: 1.1;
     }
@@ -88,7 +90,7 @@
     }
 
     .platform-name {
-      font-size: 20px;
+      font-size: clamp(16px, 4vw, 22px);
       color: var(--accent-gold);
       letter-spacing: 2px;
       font-weight: 500;
@@ -106,18 +108,25 @@
     }
 
     .sub-title {
-      font-size: 14px;
+      font-size: clamp(11px, 2.5vw, 14px);
       color: var(--text-dim);
       margin-top: 10px;
+      line-height: 1.5;
     }
 
     .status-badge {
       font-size: 12px;
-      padding: 5px 12px;
+      padding: 6px 16px;
       border-radius: 20px;
       background: #222;
       border: 1px solid #444;
       color: var(--text-dim);
+      white-space: nowrap;
+      display: inline-flex;
+      align-items: center;
+      justify-content: center;
+      gap: 5px;
+      min-width: 90px;
     }
 
     /* 架子容器 */
@@ -297,10 +306,19 @@
     .stat-label { font-size: 12px; color: var(--text-dim); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
 
     /* 警告樣式 */
-    .stat-card.alert { background: rgba(255, 0, 0, 0.1); border-color: rgba(255, 0, 0, 0.3); }
-    .stat-card.alert .stat-value { color: #ff4444; }
-    .stat-card.alert .stat-label { color: #ff8888; }
-    .pulse { animation: pulse-red 2s infinite; }
+      .slot-card.occupied { border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(184, 134, 11, 0.2); }
+      .slot-card.disabled { 
+        background: #111; 
+        border: 1px solid #222; 
+        opacity: 0.5; 
+        cursor: not-allowed;
+      }
+      .slot-card.disabled .item-name { 
+        color: #444; 
+        font-size: 9px; 
+        letter-spacing: 1.5px;
+        font-weight: 500;
+      }
     @keyframes pulse-red {
       0% { box-shadow: 0 0 0 0 rgba(255, 0, 0, 0.4); }
       70% { box-shadow: 0 0 0 10px rgba(255, 0, 0, 0); }
@@ -344,6 +362,105 @@
       .print-item-note { font-size: 14px; margin-top: 5px; color: #333 !important; line-height: 1.2; }
     }
     #printArea { display: none; }
+    
+    /* 維修區塊樣式 */
+    .repair-section {
+      margin-bottom: 30px;
+      display: none; /* 有資料才顯示 */
+    }
+    .repair-title {
+      font-size: 14px;
+      color: var(--accent-gold);
+      margin-bottom: 10px;
+      display: flex;
+      align-items: center;
+      gap: 10px;
+      letter-spacing: 1px;
+    }
+    .repair-list {
+      display: grid;
+      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
+      gap: 15px;
+    }
+    .repair-item {
+      background: rgba(255, 68, 68, 0.05);
+      border: 1px solid rgba(255, 68, 68, 0.2);
+      border-radius: 8px;
+      padding: 12px;
+      display: flex;
+      justify-content: space-between;
+      align-items: center;
+    }
+    .repair-info h4 { margin: 0; font-size: 14px; color: #ddd; }
+    .repair-info p { margin: 3px 0 0; font-size: 12px; color: #888; }
+    .btn-resolve {
+      background: rgba(255, 255, 255, 0.1);
+      color: #fff;
+      padding: 5px 12px;
+      border-radius: 4px;
+      font-size: 11px;
+      border: 1px solid #444;
+      cursor: pointer;
+    }
+    .btn-resolve:hover { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
+
+    /* 分頁樣式 */
+    .modal-tabs {
+      display: flex;
+      gap: 10px;
+      margin-bottom: 20px;
+      border-bottom: 1px solid #333;
+    }
+    .tab {
+      padding: 8px 15px;
+      cursor: pointer;
+      font-size: 13px;
+      color: var(--text-dim);
+      border-bottom: 2px solid transparent;
+      transition: all 0.2s;
+    }
+    .tab.active {
+      color: var(--accent-gold);
+      border-bottom: 2px solid var(--accent-gold);
+    }
+    
+    .history-item {
+      padding: 10px;
+      background: rgba(46, 204, 113, 0.05);
+      border: 1px solid rgba(46, 204, 113, 0.2);
+      border-radius: 8px;
+      margin-bottom: 8px;
+      font-size: 12px;
+    }
+    .history-tag {
+      background: #2ecc71;
+      color: #000;
+      padding: 2px 6px;
+      border-radius: 3px;
+      font-size: 10px;
+      font-weight: bold;
+      margin-right: 5px;
+    }
+
+    /* 頁尾樣式 */
+    footer {
+      margin-top: 60px;
+      padding: 30px 20px;
+      text-align: center;
+      font-size: 11px;
+      color: var(--text-dim);
+      border-top: 1px solid rgba(212, 175, 55, 0.1);
+      letter-spacing: 2px;
+      text-transform: uppercase;
+    }
+    .dev-credit {
+      margin-bottom: 5px;
+      color: var(--text-dim);
+    }
+    .dev-name {
+      color: var(--accent-gold);
+      font-weight: 600;
+    }
   </style>
 </head>
 <body>
@@ -362,12 +479,14 @@
         <h1>體育器材</h1>
         <div class="platform-line">
           <span class="platform-name">數位管理平台</span>
-          <span class="version-tag">v2.5 Beta</span>
+          <span class="version-tag">V1.0 BETA</span>
         </div>
         <div class="sub-title">及時監測體育器材庫存與擺放位置</div>
       </div>
-      <div style="display: flex; gap: 10px; align-items: center;">
-        <button onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印架位標籤</button>
+      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+        <span id="adminStatus" onclick="toggleAdmin()" class="status-badge" style="cursor:pointer; border:1px solid #444; font-size:11px;">🔒 管理員登入</span>
+        <button onclick="openRepairModal()" class="status-badge" style="background:rgba(255,68,68,0.2); color:#ff6666; cursor:pointer; font-weight:bold; border:1px solid rgba(255,68,68,0.3);">🛠️ 報修登記</button>
+        <button onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印標籤</button>
         <div id="loadingStatus" class="status-badge">同步中...</div>
       </div>
     </div>
@@ -394,15 +513,37 @@
   </div>
 
   <div id="loader">載入中...</div>
+  
+  <!-- 維修清單區 -->
+  <div id="repairSection" class="repair-section">
+    <div class="repair-title">
+      <span>🛠️ 待處理維修項目</span>
+      <div style="flex:1; height:1px; background:rgba(255,68,68,0.2);"></div>
+    </div>
+    <div id="repairList" class="repair-list"></div>
+  </div>
+
   <div id="racksContainer" class="racks-container"></div>
   
   <!-- 隱藏的列印區 -->
   <div id="printArea"></div>
 
+  <footer>
+    <div class="dev-credit">Digital Transformation Project</div>
+    <div>Developed by <span class="dev-name">River</span> | © 2026 Buzi Elementary School</div>
+  </footer>
+
   <!-- 編輯彈窗 -->
   <div id="modalOverlay">
     <div class="modal">
       <div id="modalTitle" class="modal-title">位置編輯</div>
+      
+      <!-- 報修專用分頁標籤 -->
+      <div id="repairTabs" class="modal-tabs" style="display:none;">
+        <div class="tab active" onclick="switchRepairTab('form')">📝 我要報修</div>
+        <div class="tab" onclick="switchRepairTab('pending')">⏳ 待修復清單</div>
+        <div class="tab" onclick="switchRepairTab('history')">📜 歷史紀錄</div>
+      </div>
       
       <!-- 模式一：編輯位置表單 -->
       <form id="editForm">
@@ -413,10 +554,14 @@
         <div class="form-group"><label>數量</label><input type="number" id="qtyInput" min="0" value="0"></div>
         <div class="form-group"><label>籃子大小</label><select id="sizeSelect"><option value="小">小籃子 (1格)</option><option value="大">大籃子 (2格 / 固定向右合併)</option></select></div>
         <div class="form-group"><label>備註內容 (如顏色、尺寸、細項)</label><textarea id="noteInput" placeholder="例如：&#10;紅*10, 藍*5&#10;特大號*2"></textarea></div>
-        <div class="btn-group">
+        <div id="adminButtons" class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
-          <button type="button" class="btn-delete" onclick="clearThisSlot()">清空此格</button>
+          <button type="button" id="btnToggleDisable" class="btn-delete" style="background:#444;" onclick="toggleDisableSlot()">停用此格</button>
+          <button type="button" class="btn-delete" onclick="clearThisSlot()">清空內容</button>
           <button type="submit" class="btn-save">儲存更新</button>
+        </div>
+        <div id="guestButtons" class="btn-group" style="display:none;">
+          <button type="button" class="btn-cancel" onclick="closeModal()" style="background:var(--accent-gold); color:#000;">確認並關閉</button>
         </div>
       </form>
 
@@ -427,6 +572,48 @@
           <button type="button" class="btn-cancel" onclick="closeModal()" style="background:var(--accent-gold); color:#000;">關閉</button>
         </div>
       </div>
+
+      <!-- 模式三：報修登記表單 -->
+      <form id="repairForm" style="display:none;">
+        <div class="form-group"><label>器材名稱</label><select id="repairEquipSelect"></select></div>
+        <div class="form-group"><label>數量</label><input type="number" id="repairQty" min="1" value="1"></div>
+        <div class="form-group"><label>損壞狀況描述</label><textarea id="repairNote" placeholder="例如：漏氣、破損、無法開機..."></textarea></div>
+        <div class="form-group"><label>報修人 (姓名/班級)</label><input type="text" id="repairReporter" placeholder="例如：River / 601"></div>
+        <div class="btn-group">
+          <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn-save" style="background:#e74c3c; color:#fff;">送出報修</button>
+        </div>
+      </form>
+
+      <!-- 模式四：待修復清單 (Modal 內版本) -->
+      <div id="repairPendingModal" style="display:none;">
+        <div id="pendingListModal" style="max-height: 400px; overflow-y: auto;">
+          <div style="text-align:center; color:#555; padding:20px;">載入中...</div>
+        </div>
+        <div class="btn-group" style="margin-top: 15px;">
+          <button type="button" class="btn-cancel" onclick="closeModal()">關閉</button>
+        </div>
+      </div>
+
+      <!-- 模式五：維修歷史紀錄 -->
+      <div id="repairHistory" style="display:none;">
+        <div id="historyList" style="max-height: 400px; overflow-y: auto;">
+          <div style="text-align:center; color:#555; padding:20px;">載入中...</div>
+        </div>
+        <div class="btn-group" style="margin-top: 15px;">
+          <button type="button" class="btn-cancel" onclick="closeModal()">關閉</button>
+        </div>
+      </div>
+
+      <!-- 模式六：備品快速更新表單 -->
+      <form id="spareForm" style="display:none;">
+        <div style="margin-bottom:15px; color:var(--accent-gold); font-size:16px;" id="spareEquipTitle">器材名稱</div>
+        <div class="form-group"><label>目前備品數量</label><input type="number" id="spareQtyInput" min="0" value="0"></div>
+        <div class="btn-group">
+          <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
+          <button type="submit" class="btn-save">確認更新</button>
+        </div>
+      </form>
 
     </div>
   </div>
@@ -440,6 +627,7 @@
     window.onload = () => {
       fetchData();
       fetchEquipmentList();
+      fetchRepairData();
     };
 
     async function fetchData() {
@@ -447,7 +635,7 @@
       try {
         const response = await fetch(`${API_URL}?action=getInventory`);
         inventory = await response.json();
-        renderRacks(); // 資料回來就畫一次
+        renderRacks();
         document.getElementById('loader').style.display = 'none';
         document.getElementById('loadingStatus').textContent = '已同步';
       } catch (e) {
@@ -459,14 +647,28 @@
       try {
         const response = await fetch(`${API_URL}?action=getEquipment`);
         equipmentList = await response.json();
-        renderRacks(); // 資料回來也畫一次，確保預警數字更新
+        renderRacks();
         
-        const select = document.getElementById('equipSelect');
-        select.innerHTML = '<option value="">(空)</option>';
-        equipmentList.forEach(item => {
-          const opt = document.createElement('option');
-          opt.value = item.name; opt.textContent = item.name;
-          select.appendChild(opt);
+        const selects = [document.getElementById('equipSelect'), document.getElementById('repairEquipSelect')];
+        selects.forEach(select => {
+          select.innerHTML = '<option value="">(空)</option>';
+          const groups = {};
+          equipmentList.forEach(item => {
+            const cat = item.category || '99-未分類';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(item);
+          });
+          Object.keys(groups).sort().forEach(catName => {
+            const groupEl = document.createElement('optgroup');
+            groupEl.label = catName.split('-').pop();
+            groups[catName].forEach(item => {
+              const opt = document.createElement('option');
+              opt.value = item.name;
+              opt.textContent = item.name;
+              groupEl.appendChild(opt);
+            });
+            select.appendChild(groupEl);
+          });
         });
       } catch (e) {
         console.error("抓取器材清單失敗", e);
@@ -477,9 +679,8 @@
       const container = document.getElementById('racksContainer');
       container.innerHTML = '';
       
-      // --- 更新統計數據 ---
-      const totalSlots = inventory.filter(d => !d.Status.includes('被')).length;
-      const occupied = inventory.filter(d => d.Equipment_Name && !d.Status.includes('被')).length;
+      const totalSlots = inventory.filter(d => !d.Status.includes('被') && d.Status !== '停用中' && d.Rack_ID !== 'SPARE').length;
+      const occupied = inventory.filter(d => d.Equipment_Name && !d.Status.includes('被') && d.Status !== '停用中' && d.Rack_ID !== 'SPARE').length;
       const totals = {};
       inventory.forEach(d => {
         if (d.Equipment_Name) totals[d.Equipment_Name] = (totals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
@@ -529,92 +730,174 @@
         
         // 特殊處理備品區與其他器材標題
         const isInventoryMode = rackId === "備品區" || rackId === "其他器材";
-        const displayTitle = rackId;
-        let html = `<div class="rack-header">區域 ${displayTitle}</div>`;
-        
-        if (isInventoryMode) {
-          // --- 庫存清單模式 ---
-          html += `<div style="display:grid; grid-template-columns:repeat(auto-fill, minmax(120px, 1fr)); gap:8px; padding:10px;">`;
-          
-          const areaSlots = inventory.filter(d => d.Rack_ID === rackId);
-          areaSlots.forEach((slot, index) => {
-            const currentQty = slot.Quantity || 0;
-            const itemName = slot.Equipment_Name || `(格位 ${index + 1})`;
-            
-            html += `
-              <div class="slot ${slot.Equipment_Name ? 'has-item' : ''}" style="height:70px;" onclick="openModal(${JSON.stringify(slot).replace(/"/g, '&quot;')})">
-                <div class="item-name" style="font-size:12px;">${itemName}</div>
-                <div class="item-qty" style="font-size:16px; font-weight:700;">${currentQty}</div>
-              </div>`;
-          });
-          html += `</div>`;
-          card.innerHTML = html;
-          container.appendChild(card);
-          return; // 結束備品區處理，不執行後面的層級渲染
-        }
-
-        // --- 一般架位：層級渲染模式 ---
+        let html = `<div class="area-title">${rackId === '備品區' ? '備品區 (所有器材備料狀態)' : '區域 ' + rackId}</div>`;
         html += `<div id="container-${rackId}"></div>`;
         card.innerHTML = html;
         container.appendChild(card);
         
-        const levelsContainer = card.querySelector(`#container-${rackId}`);
         const rackData = inventory.filter(d => d.Rack_ID === rackId);
-        const levels = [...new Set(rackData.map(d => d.Level))].sort((a, b) => b - a);
 
-        levels.forEach(l => {
-          const levelRow = document.createElement('div');
-          levelRow.className = 'level-row';
-          levelRow.innerHTML = `<div class="level-label">Level ${l}</div>`;
-          const slotsRow = document.createElement('div');
-          slotsRow.className = 'slots-row';
-          const levelData = rackData.filter(d => d.Level == l);
+        if (rackId === "備品區") {
+          // --- 備品區特殊渲染邏輯：依分類分群顯示 ---
+          const mainContainer = document.createElement('div');
+          mainContainer.style.padding = '10px';
           
-          for (let b = 1; b <= 4; b++) {
-            const slotData = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
-            if (!slotData || (slotData.Status && slotData.Status.includes('被'))) continue;
-            
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'slot';
-            if (slotData.Basket_Size === '大') slotDiv.classList.add('big');
-            if (slotData.Equipment_Name) slotDiv.classList.add('has-item');
-            
-            slotDiv.innerHTML = `
-              <div class="slot-id">${slotData.Slot_ID}</div>
-              <div class="item-name">${slotData.Equipment_Name || ''}</div>
-              <div class="item-qty">${slotData.Quantity > 0 ? slotData.Quantity : ''}</div>
+          // 按類別分組
+          const groups = {};
+          equipmentList.forEach(equip => {
+            const cat = equip.category || '99-其他';
+            if (!groups[cat]) groups[cat] = [];
+            groups[cat].push(equip);
+          });
+
+          // 產生各類別的分群框
+          Object.keys(groups).sort().forEach(catKey => {
+            const groupWrapper = document.createElement('div');
+            groupWrapper.style.cssText = `
+              border: 1px solid rgba(255, 255, 255, 0.05);
+              background: rgba(255, 255, 255, 0.02);
+              border-radius: 12px;
+              padding: 15px;
+              margin-bottom: 20px;
             `;
-            slotDiv.onclick = () => openModal(slotData);
-            slotsRow.appendChild(slotDiv);
-          }
-          levelRow.appendChild(slotsRow);
-          card.appendChild(levelRow);
-        });
-        container.appendChild(card);
+            
+            const groupTitle = document.createElement('div');
+            groupTitle.style.cssText = `
+              color: var(--accent-gold);
+              font-size: 14px;
+              font-weight: bold;
+              margin-bottom: 12px;
+              padding-left: 8px;
+              border-left: 3px solid var(--accent-gold);
+              letter-spacing: 1px;
+            `;
+            groupTitle.textContent = catKey.split('-').pop();
+            groupWrapper.appendChild(groupTitle);
+
+            const cardsRow = document.createElement('div');
+            cardsRow.style.cssText = `
+              display: flex;
+              flex-wrap: wrap;
+              gap: 12px;
+            `;
+
+            groups[catKey].forEach(equip => {
+              const spareData = inventory.find(d => d.Rack_ID === "備品區" && d.Equipment_Name === equip.name);
+              const qty = spareData ? spareData.Quantity : 0;
+              const unit = equip.unit || '';
+              
+              const sCard = document.createElement('div');
+              sCard.className = `slot ${qty > 0 ? 'has-item' : ''}`;
+              sCard.style.cssText = `
+                width: 120px !important; 
+                height: 85px !important; 
+                flex: 0 0 120px !important; 
+                display: flex; 
+                flex-direction: column; 
+                justify-content: center; 
+                align-items: center; 
+                cursor: pointer;
+                background: #111;
+                border: 1px solid #222;
+              `;
+              sCard.innerHTML = `
+                <div class="item-name" style="font-size:13px; margin-bottom:5px; color:#eee;">${equip.name}</div>
+                <div class="item-qty" style="font-size:20px; color:var(--accent-gold); font-weight:800; line-height:1;">${qty}</div>
+                <div style="font-size:10px; opacity:0.5; margin-top:3px;">${unit}</div>
+              `;
+              sCard.onclick = () => openSpareModal(equip.name, qty);
+              cardsRow.appendChild(sCard);
+            });
+            groupWrapper.appendChild(cardsRow);
+            mainContainer.appendChild(groupWrapper);
+          });
+          card.appendChild(mainContainer);
+        } else {
+          // --- 一般架位渲染邏輯 ---
+          const levels = [...new Set(rackData.map(d => d.Level))].sort((a, b) => b - a);
+          const levelsToRender = levels.length > 0 ? levels : [1];
+
+          levelsToRender.forEach(l => {
+            const levelRow = document.createElement('div');
+            levelRow.className = 'level-row';
+            levelRow.innerHTML = `<div class="level-label">Level ${l}</div>`;
+            const slotsRow = document.createElement('div');
+            slotsRow.className = 'slots-row';
+            const levelData = rackData.filter(d => d.Level == l);
+
+            for (let b = 1; b <= 4; b++) {
+              const slotData = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
+              if (!slotData || (slotData.Status && slotData.Status.includes('被'))) continue;
+              const slotDiv = document.createElement('div');
+              slotDiv.className = 'slot';
+              if (slotData.Basket_Size === '大') slotDiv.classList.add('big');
+              if (slotData.Equipment_Name) slotDiv.classList.add('has-item');
+              if (slotData.Status === '停用中') slotDiv.classList.add('disabled');
+              slotDiv.innerHTML = `
+                <div class="slot-id">${slotData.Slot_ID}</div>
+                <div class="item-name">${slotData.Status === '停用中' ? '<span style="font-size:7px; opacity:0.4;">CLOSED</span>' : (slotData.Equipment_Name || '')}</div>
+                <div class="item-qty">${slotData.Status === '停用中' ? '' : (slotData.Quantity > 0 ? slotData.Quantity : '')}</div>
+              `;
+              slotDiv.onclick = () => openModal(slotData);
+              slotsRow.appendChild(slotDiv);
+            }
+            levelRow.appendChild(slotsRow);
+            card.appendChild(levelRow);
+          });
+        }
       });
     }
 
     function openModal(data) {
-      // 切換回編輯模式
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      const isDisabled = data.Status === "停用中";
+      
+      // 切換回編輯模式，並隱藏維修相關元件
       document.getElementById('editForm').style.display = 'block';
       document.getElementById('detailContent').style.display = 'none';
+      document.getElementById('repairTabs').style.display = 'none';
+      document.getElementById('repairForm').style.display = 'none';
+      document.getElementById('repairHistory').style.display = 'none';
 
       document.getElementById('editSlotId').value = data.Slot_ID;
       document.getElementById('editRackId').value = data.Rack_ID;
       document.getElementById('editLevel').value = data.Level;
-      document.getElementById('modalTitle').textContent = `編輯位置: ${data.Slot_ID}`;
+      
+      let title = data.Slot_ID;
+      if (isDisabled) title += " [🚫 停用中]";
+      document.getElementById('modalTitle').textContent = (isAdmin ? '編輯位置: ' : '位置資訊: ') + title;
+      
       document.getElementById('equipSelect').value = data.Equipment_Name || '';
       document.getElementById('qtyInput').value = data.Quantity || 0;
       document.getElementById('sizeSelect').value = data.Basket_Size || '小';
       document.getElementById('noteInput').value = data.Note || '';
       
+      // 權限控制：非管理員 或 停用中 則禁用輸入
+      const shouldDisableInput = !isAdmin || isDisabled;
+      document.getElementById('equipSelect').disabled = shouldDisableInput;
+      document.getElementById('qtyInput').disabled = shouldDisableInput;
+      document.getElementById('sizeSelect').disabled = shouldDisableInput;
+      document.getElementById('noteInput').disabled = shouldDisableInput;
+      
+      document.getElementById('adminButtons').style.display = isAdmin ? 'flex' : 'none';
+      document.getElementById('guestButtons').style.display = isAdmin ? 'none' : 'flex';
+      
+      // 更新停用按鈕文字
+      const btnToggle = document.getElementById('btnToggleDisable');
+      if (btnToggle) {
+        btnToggle.textContent = isDisabled ? '啟用此格' : '停用此格';
+        btnToggle.style.background = isDisabled ? 'var(--accent-gold)' : '#444';
+        btnToggle.style.color = isDisabled ? '#000' : '#fff';
+      }
+
       const slotNum = parseInt(data.Slot_ID.split('-').pop());
-      document.getElementById('sizeSelect').disabled = (slotNum === 4);
+      if (isAdmin && !isDisabled) document.getElementById('sizeSelect').disabled = (slotNum === 4);
       document.getElementById('modalOverlay').style.display = 'flex';
     }
 
     function closeModal() {
       document.getElementById('modalOverlay').style.display = 'none';
+      document.getElementById('repairTabs').style.display = 'none'; // 關閉時重置
     }
 
     function showEquipmentDetail() {
@@ -739,7 +1022,8 @@
         qty: parseInt(document.getElementById('qtyInput').value),
         size: document.getElementById('sizeSelect').value,
         note: document.getElementById('noteInput').value,
-        operator: 'GitHub 網頁端'
+        operator: 'River (Admin)',
+        password: localStorage.getItem('adminPIN')
       };
       closeModal();
       try {
@@ -747,6 +1031,191 @@
         fetchData();
       } catch (err) { alert('更新失敗'); }
     };
+
+    // --- 維修相關功能 ---
+    async function fetchRepairData() {
+      try {
+        const response = await fetch(`${API_URL}?action=getRepair`);
+        const repairs = await response.json();
+        renderRepairList(repairs);
+      } catch (e) { console.error("抓取維修資料失敗", e); }
+    }
+
+    function renderRepairList(repairs) {
+      const section = document.getElementById('repairSection');
+      const list = document.getElementById('repairList');
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      if (!repairs || repairs.length === 0) {
+        section.style.display = 'none';
+        return;
+      }
+      section.style.display = 'block';
+      list.innerHTML = repairs.map(item => `
+        <div class="repair-item">
+          <div class="repair-info">
+            <h4>${item.Equipment} x ${item.Quantity}</h4>
+            <p>${item.Note || '無描述'} (${item.Reporter || '匿名'})</p>
+          </div>
+          ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
+        </div>
+      `).join('');
+    }
+
+    function openRepairModal() {
+      document.getElementById('editForm').style.display = 'none';
+      document.getElementById('detailContent').style.display = 'none';
+      document.getElementById('repairTabs').style.display = 'flex';
+      switchRepairTab('form'); // 預設顯示表單
+      document.getElementById('modalTitle').textContent = '🛠️ 器材維修中心';
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    function switchRepairTab(type) {
+      const tabs = document.querySelectorAll('.tab');
+      tabs[0].classList.toggle('active', type === 'form');
+      tabs[1].classList.toggle('active', type === 'pending');
+      tabs[2].classList.toggle('active', type === 'history');
+      
+      document.getElementById('repairForm').style.display = type === 'form' ? 'block' : 'none';
+      document.getElementById('repairPendingModal').style.display = type === 'pending' ? 'block' : 'none';
+      document.getElementById('repairHistory').style.display = type === 'history' ? 'block' : 'none';
+      
+      if (type === 'pending') fetchRepairPendingInModal();
+      if (type === 'history') fetchRepairHistory();
+    }
+
+    async function fetchRepairPendingInModal() {
+      const list = document.getElementById('pendingListModal');
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">清單讀取中...</div>';
+      try {
+        const response = await fetch(`${API_URL}?action=getRepair&type=pending`);
+        const pending = await response.json();
+        
+        if (!pending || pending.length === 0) {
+          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前無待維修項目</div>';
+          return;
+        }
+        
+        list.innerHTML = pending.map(item => `
+          <div class="repair-item" style="margin-bottom:10px;">
+            <div class="repair-info">
+              <h4>${item.Equipment} x ${item.Quantity}</h4>
+              <p>${item.Note || '無描述'} (${item.Reporter || '匿名'})</p>
+            </div>
+            ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
+          </div>
+        `).join('');
+      } catch (e) { list.innerHTML = '讀取失敗'; }
+    }
+
+    async function fetchRepairHistory() {
+      const list = document.getElementById('historyList');
+      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">歷史讀取中...</div>';
+      try {
+        const response = await fetch(`${API_URL}?action=getRepair&type=history`);
+        const history = await response.json();
+        
+        if (!history || history.length === 0) {
+          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前尚無維修紀錄</div>';
+          return;
+        }
+        
+        list.innerHTML = history.map(item => `
+          <div class="history-item">
+            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
+              <span style="font-weight:600; color:#eee;"><span class="history-tag">已修復</span>${item.Equipment} x ${item.Quantity}</span>
+              <span style="color:#555; font-size:10px;">${new Date(item.Timestamp).toLocaleDateString()}</span>
+            </div>
+            <div style="color:#888;">狀況：${item.Note || '無描述'}</div>
+            <div style="color:#555; font-size:10px; margin-top:3px;">修復時間：${item.Resolved_At ? new Date(item.Resolved_At).toLocaleString() : '---'}</div>
+          </div>
+        `).join('');
+      } catch (e) { list.innerHTML = '讀取失敗'; }
+    }
+
+    document.getElementById('repairForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const payload = {
+        action: 'addRepair',
+        equipment: document.getElementById('repairEquipSelect').value,
+        qty: parseInt(document.getElementById('repairQty').value),
+        note: document.getElementById('repairNote').value,
+        reporter: document.getElementById('repairReporter').value
+      };
+      if (!payload.equipment) return alert('請選擇器材');
+      
+      closeModal();
+      document.getElementById('loadingStatus').textContent = '登記中...';
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
+        fetchRepairData();
+        document.getElementById('loadingStatus').textContent = '已登記';
+      } catch (err) { alert('登記失敗'); }
+    };
+
+    async function resolveRepair(id) {
+      if (!confirm('確認此器材已修復完成並歸位？')) return;
+      document.getElementById('loadingStatus').textContent = '結案中...';
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
+          action: 'resolveRepair', 
+          repairId: id,
+          password: localStorage.getItem('adminPIN')
+        }) });
+        fetchRepairData();
+        document.getElementById('loadingStatus').textContent = '已結案';
+      } catch (err) { alert('操作失敗'); }
+    }
+
+    async function toggleDisableSlot() {
+      const slotId = document.getElementById('editSlotId').value;
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      if (!isAdmin) return;
+      
+      closeModal();
+      document.getElementById('loadingStatus').textContent = '更新狀態中...';
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
+          action: 'toggleDisable', 
+          slotId: slotId,
+          password: localStorage.getItem('adminPIN')
+        }) });
+        fetchData();
+      } catch (err) { alert('操作失敗'); }
+    }
+
+    // --- 管理員模式切換 ---
+    function updateAdminUI() {
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      document.getElementById('adminStatus').innerHTML = isAdmin ? '🔓 已進入管理模式 (點擊登出)' : '🔒 管理員登入';
+      document.getElementById('adminStatus').style.color = isAdmin ? 'var(--accent-gold)' : '#555';
+    }
+
+    function toggleAdmin() {
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      if (isAdmin) {
+        if (confirm('確定要登出管理員模式嗎？')) {
+          localStorage.removeItem('adminPIN');
+          updateAdminUI();
+          renderRacks(); // 重新渲染以更新按鈕狀態
+        }
+      } else {
+        const pin = prompt('請輸入管理員密碼：');
+        if (pin === null) return;
+        if (pin === '1234') { // 這裡要與 Code.gs 的 ADMIN_PASS 一致
+          localStorage.setItem('adminPIN', pin);
+          updateAdminUI();
+          renderRacks();
+          alert('管理員登入成功！');
+        } else {
+          alert('密碼錯誤！');
+        }
+      }
+    }
+    
+    // 初始化時檢查狀態
+    updateAdminUI();
 
     function generatePrintLabels() {
       const printArea = document.getElementById('printArea');
@@ -800,6 +1269,43 @@
         window.print();
       }, 500);
     }
+    // --- 備品專用彈窗邏輯 ---
+    function openSpareModal(equipName, currentQty) {
+      const isAdmin = !!localStorage.getItem('adminPIN');
+      if (!isAdmin) return alert('僅限管理員修改備品數量');
+
+      document.getElementById('editForm').style.display = 'none';
+      document.getElementById('detailContent').style.display = 'none';
+      document.getElementById('repairTabs').style.display = 'none';
+      document.getElementById('repairForm').style.display = 'none';
+      document.getElementById('repairHistory').style.display = 'none';
+      document.getElementById('spareForm').style.display = 'block';
+
+      document.getElementById('modalTitle').textContent = '📦 備品數量調整';
+      document.getElementById('spareEquipTitle').textContent = equipName;
+      document.getElementById('spareQtyInput').value = currentQty;
+      document.getElementById('modalOverlay').style.display = 'flex';
+    }
+
+    document.getElementById('spareForm').onsubmit = async (e) => {
+      e.preventDefault();
+      const equipName = document.getElementById('spareEquipTitle').textContent;
+      const qty = parseInt(document.getElementById('spareQtyInput').value);
+      
+      closeModal();
+      document.getElementById('loadingStatus').textContent = '更新備品中...';
+      try {
+        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
+          action: 'updateSpare', 
+          equipment: equipName,
+          qty: qty,
+          password: localStorage.getItem('adminPIN')
+        }) });
+        fetchData();
+      } catch (err) { alert('更新失敗'); }
+    };
+
+    updateAdminUI();
   </script>
 </body>
 </html>
