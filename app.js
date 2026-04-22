@@ -473,21 +473,21 @@ async function fetchRepairHistory() {
 }
 
 function renderHistoryItems(data) {
-  console.log("Start rendering history items...");
+  console.log("=== 正在開始渲染歷史紀錄清單 ===");
   const list = document.getElementById('historyList');
   if (!list) {
-    console.error("Element #historyList not found!");
+    console.error("找不到 #historyList 元素！");
     return;
   }
 
   if (!data || data.length === 0) {
-    list.innerHTML = '<div style="text-align:center; padding:20px; color:#555;">無紀錄</div>';
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:#555;">目前沒有歷史紀錄</div>';
     return;
   }
   
   try {
     const html = data.map((item, idx) => {
-      console.log(`Processing item ${idx}:`, item);
+      console.log(`正在處理第 ${idx} 筆資料:`, item);
       let resolveTime = '未知';
       if (item.Resolved_At) {
         try {
@@ -497,22 +497,22 @@ function renderHistoryItems(data) {
       }
       
       return `
-        <div class="history-item">
+        <div class="history-item" style="border:1px solid #444; margin-bottom:8px; padding:10px; border-radius:8px; background:rgba(255,255,255,0.03);">
           <div style="display:flex; justify-content:space-between; align-items:center;">
-            <div><span class="history-tag">已修復</span><strong>${item.Equipment || '未知器材'} x ${item.Quantity || 0}</strong></div>
+            <div><span class="history-tag" style="background:#27ae60; color:white; padding:2px 6px; border-radius:4px; font-size:10px; margin-right:8px;">已修復</span><strong style="color:var(--accent-gold);">${item.Equipment || '未知器材'} x ${item.Quantity || 0}</strong></div>
           </div>
-          <div style="margin-top:5px; color:#888; font-size:11px;">
-            <div>報修人：${item.Reporter || '匿名'}</div>
-            <div>修復時間：${resolveTime}</div>
+          <div style="margin-top:8px; color:#aaa; font-size:12px; line-height:1.6; border-top:1px solid #333; padding-top:5px;">
+            <div>👤 報修人：<span style="color:#eee;">${item.Reporter || '匿名'}</span></div>
+            <div>⏰ 修復時間：<span style="color:#eee;">${resolveTime}</span></div>
           </div>
         </div>
       `;
     }).join('');
     list.innerHTML = html;
-    console.log("History rendering complete!");
+    console.log("=== 歷史紀錄渲染完成！ ===");
   } catch (err) {
-    console.error("Render history error:", err);
-    list.innerHTML = '渲染失敗：' + err.message;
+    console.error("渲染過程發生錯誤:", err);
+    list.innerHTML = '<div style="color:red; padding:10px;">渲染失敗：' + err.message + '</div>';
   }
 }
 
