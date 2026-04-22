@@ -1,487 +1,22 @@
 <!DOCTYPE html>
 <html>
+
 <head>
   <base target="_top">
   <meta charset="UTF-8">
   <meta name="viewport" content="width=device-width, initial-scale=1.0">
   <title>體育器材管理系統 - Elite Edition</title>
   <link href="https://fonts.googleapis.com/css2?family=Outfit:wght@300;400;600&display=swap" rel="stylesheet">
-  <style>
-    :root {
-      --bg-dark: #0a0a0a;
-      --card-bg: #1a1a1a;
-      --accent-gold: #d4af37;
-      --text-main: #e0e0e0;
-      --text-dim: #888;
-      --border-color: #333;
-    }
-
-    body {
-      margin: 0;
-      padding: 20px;
-      background-color: var(--bg-dark);
-      color: var(--text-main);
-      font-family: 'Outfit', sans-serif;
-    }
-
-    header {
-      padding-bottom: 30px;
-      margin-bottom: 40px;
-      border-bottom: 1px solid rgba(212, 175, 55, 0.2);
-    }
-
-    .school-branding {
-      display: flex;
-      align-items: center;
-      gap: 15px;
-      margin-bottom: 25px;
-    }
-
-    .vertical-line {
-      width: 4px;
-      height: 40px;
-      background: #3498db; /* 參考截圖中的藍色 */
-      border-radius: 2px;
-    }
-
-    .school-info {
-      display: flex;
-      flex-direction: column;
-    }
-
-    .school-name-zh {
-      font-size: clamp(14px, 4vw, 18px);
-      font-weight: 600;
-      letter-spacing: 1px;
-      color: #fff;
-    }
-
-    .school-name-en {
-      font-size: 11px;
-      font-weight: 300;
-      color: var(--text-dim);
-      text-transform: uppercase;
-      letter-spacing: 1px;
-    }
-
-    .main-title-area {
-      display: flex;
-      justify-content: space-between;
-      align-items: flex-end;
-      flex-wrap: wrap;
-      gap: 15px;
-      margin-bottom: 20px;
-    }
-
-    .title-container h1 {
-      margin: 0;
-      font-size: clamp(32px, 8vw, 64px);
-      font-weight: 700;
-      letter-spacing: 2px;
-      color: #fff;
-      line-height: 1.1;
-    }
-
-    .platform-line {
-      display: flex;
-      align-items: center;
-      gap: 12px;
-      margin-top: 5px;
-    }
-
-    .platform-name {
-      font-size: clamp(16px, 4vw, 22px);
-      color: var(--accent-gold);
-      letter-spacing: 2px;
-      font-weight: 500;
-    }
-
-    .version-tag {
-      background: rgba(212, 175, 55, 0.1);
-      color: var(--accent-gold);
-      padding: 2px 8px;
-      border-radius: 4px;
-      font-size: 11px;
-      font-weight: 700;
-      border: 1px solid rgba(212, 175, 55, 0.3);
-      text-transform: uppercase;
-    }
-
-    .sub-title {
-      font-size: clamp(11px, 2.5vw, 14px);
-      color: var(--text-dim);
-      margin-top: 10px;
-      line-height: 1.5;
-    }
-
-    .status-badge {
-      font-size: 12px;
-      padding: 6px 16px;
-      border-radius: 20px;
-      background: #222;
-      border: 1px solid #444;
-      color: var(--text-dim);
-      white-space: nowrap;
-      display: inline-flex;
-      align-items: center;
-      justify-content: center;
-      gap: 5px;
-      min-width: 90px;
-    }
-
-    /* 架子容器 */
-    .racks-container {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(320px, 1fr));
-      gap: 30px;
-    }
-
-    .rack-card {
-      background: var(--card-bg);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 15px;
-      box-shadow: 0 10px 30px rgba(0, 0, 0, 0.5);
-    }
-
-    .rack-header {
-      font-size: 18px;
-      color: var(--accent-gold);
-      margin-bottom: 15px;
-      border-left: 3px solid var(--accent-gold);
-      padding-left: 10px;
-    }
-
-    /* 層級 Row */
-    .level-row {
-      display: flex;
-      align-items: center;
-      margin-bottom: 10px;
-      background: rgba(255,255,255,0.03);
-      border-radius: 8px;
-      padding: 5px;
-    }
-
-    .level-label {
-      width: 60px;
-      font-size: 11px;
-      color: var(--text-dim);
-      text-align: center;
-    }
-
-    .slots-row {
-      display: flex;
-      flex: 1;
-      gap: 5px;
-      flex-wrap: wrap; /* 支援備品區 8 格一排 */
-    }
-
-    /* 備品區專用樣式 */
-    .spares-summary {
-      background: rgba(255,255,255,0.03);
-      padding: 15px;
-      border-radius: 8px;
-      margin-bottom: 10px;
-      border: 1px dashed #333;
-    }
-    .spares-summary-title {
-      font-size: 13px;
-      color: #888;
-      margin-bottom: 8px;
-    }
-    .spares-list {
-      display: flex;
-      flex-wrap: wrap;
-      gap: 10px;
-    }
-    .spare-tag {
-      background: rgba(212, 175, 55, 0.1);
-      border: 1px solid rgba(212, 175, 55, 0.2);
-      padding: 4px 10px;
-      border-radius: 4px;
-      font-size: 13px;
-      color: #ddd;
-    }
-    .toggle-btn {
-      width: 100%;
-      background: none;
-      border: 1px solid #333;
-      color: #777;
-      padding: 8px;
-      border-radius: 6px;
-      cursor: pointer;
-      margin-bottom: 15px;
-      transition: all 0.2s;
-    }
-    .toggle-btn:hover {
-      background: #222;
-      color: #fff;
-      border-color: #555;
-    }
-
-    /* 格子 Slot */
-    .slot {
-      flex: 1;
-      height: 60px;
-      background: #111;
-      border: 1px solid #222;
-      border-radius: 4px;
-      display: flex;
-      flex-direction: column;
-      justify-content: center;
-      align-items: center;
-      cursor: pointer;
-      transition: all 0.2s;
-      overflow: hidden;
-      position: relative;
-    }
-
-    .slot:hover {
-      border-color: var(--accent-gold);
-      background: #181818;
-    }
-
-    .slot.big { flex: 2.05; background: linear-gradient(135deg, #2c3e50 0%, #000 100%); border: 1px solid var(--accent-gold); }
-    .slot.has-item { background: rgba(212, 175, 55, 0.05); }
-
-    .slot-id { font-size: 9px; color: #555; position: absolute; top: 3px; left: 5px; }
-    .item-name { font-size: 13px; font-weight: 400; text-align: center; color: var(--text-main); }
-    .item-qty { font-size: 11px; color: var(--accent-gold); margin-top: 2px; }
-
-    /* 彈窗樣式 (通用) */
-    .modal-overlay {
-      display: none;
-      position: fixed;
-      top: 0; left: 0; width: 100%; height: 100%;
-      background: rgba(0, 0, 0, 0.85);
-      backdrop-filter: blur(8px);
-      z-index: 1000;
-      justify-content: center;
-      align-items: center;
-    }
-
-    .modal {
-      background: #1a1a1a;
-      width: 350px;
-      padding: 25px;
-      border-radius: 15px;
-      border: 1px solid var(--accent-gold);
-      box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
-    }
-
-    .modal-title { font-size: 18px; color: var(--accent-gold); margin-bottom: 20px; text-align: center; }
-    .form-group { margin-bottom: 15px; }
-    label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
-    select, input, textarea { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
-    
-    /* 修正深色模式下的日期與時間圖示 */
-    input[type="date"], input[type="time"] {
-      color-scheme: dark;
-    }
-    input[type="date"]::-webkit-calendar-picker-indicator,
-    input[type="time"]::-webkit-calendar-picker-indicator {
-      filter: invert(1);
-      cursor: pointer;
-    }
-
-    textarea { height: 150px; resize: vertical; line-height: 1.5; }
-    .btn-group { display: flex; gap: 10px; margin-top: 20px; }
-    button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; }
-    .btn-save { background: var(--accent-gold); color: #000; }
-    .btn-cancel { background: #444; color: #fff; }
-    .btn-delete { background: #e74c3c; color: #fff; border: none; }
-    .btn-delete:hover { background: #c0392b; }
-
-    #loader { position: fixed; top: 50%; left: 50%; transform: translate(-50%, -50%); color: var(--accent-gold); }
-
-    /* 統計面板樣式 */
-    .stats-panel {
-      display: flex;
-      gap: 20px;
-      margin-bottom: 30px;
-    }
-    .stat-card {
-      flex: 1;
-      background: rgba(212, 175, 55, 0.05);
-      border: 1px solid var(--border-color);
-      border-radius: 12px;
-      padding: 15px;
-      text-align: center;
-      transition: all 0.3s ease;
-    }
-    .stat-card:hover {
-      border-color: var(--accent-gold);
-      transform: translateY(-5px);
-    }
-    .stat-value { font-size: 28px; font-weight: 600; color: var(--accent-gold); }
-    .stat-label { font-size: 12px; color: var(--text-dim); margin-top: 5px; text-transform: uppercase; letter-spacing: 1px; }
-
-    /* 警告樣式 */
-      .slot-card.occupied { border-color: var(--accent-gold); box-shadow: 0 0 10px rgba(184, 134, 11, 0.2); }
-      .slot-card.disabled { 
-        background: #111; 
-        border: 1px solid #222; 
-        opacity: 0.5; 
-        cursor: not-allowed;
-      }
-      .slot-card.disabled .item-name { 
-        color: #444; 
-        font-size: 9px; 
-        letter-spacing: 1.5px;
-        font-weight: 500;
-      }
-    .stat-card.alert { 
-      background: rgba(231, 76, 60, 0.1); 
-      border-color: rgba(231, 76, 60, 0.5); 
-    }
-    .stat-card.alert .stat-value { color: #ff6666; }
-    .stat-card.pulse { animation: pulse-red 2s infinite; }
-
-    @keyframes pulse-red {
-      0% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0.4); }
-      70% { box-shadow: 0 0 0 10px rgba(231, 76, 60, 0); }
-      100% { box-shadow: 0 0 0 0 rgba(231, 76, 60, 0); }
-    }
-    /* 列印專用樣式 - 修正版 */
-    @media print {
-      body > *:not(#printArea) { display: none !important; }
-      #printArea { display: block !important; position: absolute; left: 0; top: 0; width: 100%; background: #fff !important; }
-      .print-page { 
-        page-break-after: always; 
-        padding: 20px; 
-        border: 4px solid #000 !important; 
-        margin-bottom: 20px; 
-        color: #000 !important; 
-        background: #fff !important;
-        -webkit-print-color-adjust: exact;
-        print-color-adjust: exact;
-      }
-      .print-title { font-size: 48px; font-weight: 700; text-align: center; margin-bottom: 30px; border: 4px solid #000; padding: 10px; }
-      .print-grid { 
-        display: grid; 
-        grid-template-columns: repeat(4, 1fr); 
-        grid-template-rows: repeat(3, 1fr); 
-        gap: 10px; 
-        height: 80vh;
-      }
-      .print-slot { 
-        border: 2px solid #000 !important; 
-        border-radius: 15px; 
-        display: flex; 
-        flex-direction: column; 
-        justify-content: center; 
-        align-items: center; 
-        text-align: center; 
-        padding: 5px;
-        overflow: hidden;
-      }
-      .print-slot.big { grid-column: span 2; }
-      .print-item-name { font-size: 24px; font-weight: 700; color: #000 !important; }
-      .print-item-note { font-size: 14px; margin-top: 5px; color: #333 !important; line-height: 1.2; }
-    }
-    #printArea { display: none; }
-    
-    /* 維修區塊樣式 */
-    .repair-section {
-      margin-bottom: 30px;
-      display: none; /* 有資料才顯示 */
-    }
-    .repair-title {
-      font-size: 14px;
-      color: var(--accent-gold);
-      margin-bottom: 10px;
-      display: flex;
-      align-items: center;
-      gap: 10px;
-      letter-spacing: 1px;
-    }
-    .repair-list {
-      display: grid;
-      grid-template-columns: repeat(auto-fill, minmax(280px, 1fr));
-      gap: 15px;
-    }
-    .repair-item {
-      background: rgba(255, 68, 68, 0.05);
-      border: 1px solid rgba(255, 68, 68, 0.2);
-      border-radius: 8px;
-      padding: 12px;
-      display: flex;
-      justify-content: space-between;
-      align-items: center;
-    }
-    .repair-info h4 { margin: 0; font-size: 14px; color: #ddd; }
-    .repair-info p { margin: 3px 0 0; font-size: 12px; color: #888; }
-    .btn-resolve {
-      background: rgba(255, 255, 255, 0.1);
-      color: #fff;
-      padding: 5px 12px;
-      border-radius: 4px;
-      font-size: 11px;
-      border: 1px solid #444;
-      cursor: pointer;
-    }
-    .btn-resolve:hover { background: var(--accent-gold); color: #000; border-color: var(--accent-gold); }
-
-    /* 分頁樣式 */
-    .modal-tabs {
-      display: flex;
-      gap: 10px;
-      margin-bottom: 20px;
-      border-bottom: 1px solid #333;
-    }
-    .tab {
-      padding: 8px 15px;
-      cursor: pointer;
-      font-size: 13px;
-      color: var(--text-dim);
-      border-bottom: 2px solid transparent;
-      transition: all 0.2s;
-    }
-    .tab.active {
-      color: var(--accent-gold);
-      border-bottom: 2px solid var(--accent-gold);
-    }
-    
-    .history-item {
-      padding: 10px;
-      background: rgba(46, 204, 113, 0.05);
-      border: 1px solid rgba(46, 204, 113, 0.2);
-      border-radius: 8px;
-      margin-bottom: 8px;
-      font-size: 12px;
-    }
-    .history-tag {
-      background: #2ecc71;
-      color: #000;
-      padding: 2px 6px;
-      border-radius: 3px;
-      font-size: 10px;
-      font-weight: bold;
-      margin-right: 5px;
-    }
-
-    /* 頁尾樣式 */
-    footer {
-      margin-top: 60px;
-      padding: 30px 20px;
-      text-align: center;
-      font-size: 11px;
-      color: var(--text-dim);
-      border-top: 1px solid rgba(212, 175, 55, 0.1);
-      letter-spacing: 2px;
-      text-transform: uppercase;
-    }
-    .dev-credit {
-      margin-bottom: 5px;
-      color: var(--text-dim);
-    }
-    .dev-name {
-      color: var(--accent-gold);
-      font-weight: 600;
-    }
-  </style>
+  <link rel="stylesheet" href="style.css">
 </head>
+
 <body>
+
+  <!-- 載入動畫 (保留您喜歡的新版樣式) -->
+  <div id="loading-overlay" class="loading-overlay">
+    <div class="loader"></div>
+    <p>同步即時數據中...</p>
+  </div>
 
   <header>
     <div class="school-branding">
@@ -491,7 +26,7 @@
         <div class="school-name-en">BUZI ELEMENTARY SCHOOL</div>
       </div>
     </div>
-    
+
     <div class="main-title-area">
       <div class="title-container">
         <h1>體育器材</h1>
@@ -502,10 +37,17 @@
         <div class="sub-title">及時監測體育器材庫存與擺放位置</div>
       </div>
       <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
-        <span id="adminStatus" onclick="toggleAdmin()" class="status-badge" style="cursor:pointer; border:1px solid #444; font-size:11px;">🔒 管理員登入</span>
-        <button onclick="openBorrowModal()" class="status-badge" style="background:rgba(52,152,219,0.2); color:#3498db; cursor:pointer; font-weight:bold; border:1px solid rgba(52,152,219,0.3);">📦 借用登記</button>
-        <button onclick="openRepairModal()" class="status-badge" style="background:rgba(255,68,68,0.2); color:#ff6666; cursor:pointer; font-weight:bold; border:1px solid rgba(255,68,68,0.3);">🛠️ 報修登記</button>
-        <button id="btnPrintLabels" onclick="generatePrintLabels()" class="status-badge" style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️ 列印標籤</button>
+        <span id="adminStatus" onclick="toggleAdmin()" class="status-badge"
+          style="cursor:pointer; border:1px solid #444; font-size:11px;">🔒 管理員登入</span>
+        <button onclick="openBorrowModal()" class="status-badge"
+          style="background:rgba(52,152,219,0.2); color:#3498db; cursor:pointer; font-weight:bold; border:1px solid rgba(52,152,219,0.3);">📦
+          借用登記</button>
+        <button onclick="openRepairModal()" class="status-badge"
+          style="background:rgba(255,68,68,0.2); color:#ff6666; cursor:pointer; font-weight:bold; border:1px solid rgba(255,68,68,0.3);">🛠️
+          報修登記</button>
+        <button id="btnPrintLabels" onclick="generatePrintLabels()" class="status-badge"
+          style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️
+          列印標籤</button>
         <div id="loadingStatus" class="status-badge">同步中...</div>
       </div>
     </div>
@@ -531,8 +73,6 @@
     </div>
   </div>
 
-  <div id="loader">載入中...</div>
-  
   <!-- 維修清單區 -->
   <div id="repairSection" class="repair-section">
     <div class="repair-title">
@@ -543,7 +83,7 @@
   </div>
 
   <div id="racksContainer" class="racks-container"></div>
-  
+
   <!-- 隱藏的列印區 -->
   <div id="printArea"></div>
 
@@ -556,75 +96,77 @@
   <div id="modalOverlay" class="modal-overlay">
     <div class="modal">
       <div id="modalTitle" class="modal-title">位置編輯</div>
-      
-      <!-- 報修專用分頁標籤 -->
+
       <div id="repairTabs" class="modal-tabs" style="display:none;">
         <div class="tab active" onclick="switchRepairTab('form')">📝 我要報修</div>
         <div class="tab" onclick="switchRepairTab('pending')">⏳ 待修復清單</div>
         <div class="tab" onclick="switchRepairTab('history')">📜 歷史紀錄</div>
       </div>
-      
-      <!-- 模式一：編輯位置表單 -->
+
       <form id="editForm">
         <input type="hidden" id="editSlotId">
         <input type="hidden" id="editRackId">
         <input type="hidden" id="editLevel">
-        <div class="form-group"><label>器材名稱</label><select id="equipSelect"><option value="">(空)</option></select></div>
+        <div class="form-group"><label>器材名稱</label><select id="equipSelect">
+            <option value="">(空)</option>
+          </select></div>
         <div class="form-group"><label>數量</label><input type="number" id="qtyInput" min="0" value="0"></div>
-        <div class="form-group"><label>籃子大小</label><select id="sizeSelect"><option value="小">小籃子 (1格)</option><option value="大">大籃子 (2格 / 固定向右合併)</option></select></div>
-        <div class="form-group"><label>備註內容 (如顏色、尺寸、細項)</label><textarea id="noteInput" placeholder="例如：&#10;紅*10, 藍*5&#10;特大號*2"></textarea></div>
+        <div class="form-group"><label>籃子大小</label><select id="sizeSelect">
+            <option value="小">小籃子 (1格)</option>
+            <option value="大">大籃子 (2格 / 固定向右合併)</option>
+          </select></div>
+        <div class="form-group"><label>備註內容 (如顏色、尺寸、細項)</label><textarea id="noteInput"
+            placeholder="例如：&#10;紅*10, 藍*5&#10;特大號*2"></textarea></div>
         <div id="adminButtons" class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
-          <button type="button" id="btnToggleDisable" class="btn-delete" style="background:#444;" onclick="toggleDisableSlot()">停用此格</button>
+          <button type="button" id="btnToggleDisable" class="btn-delete" style="background:#444;"
+            onclick="toggleDisableSlot()">停用此格</button>
           <button type="button" class="btn-delete" onclick="clearThisSlot()">清空內容</button>
           <button type="submit" class="btn-save">儲存更新</button>
         </div>
         <div id="guestButtons" class="btn-group" style="display:none;">
-          <button type="button" class="btn-cancel" onclick="closeModal()" style="background:var(--accent-gold); color:#000;">確認並關閉</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()"
+            style="background:var(--accent-gold); color:#000;">確認並關閉</button>
         </div>
       </form>
 
-      <!-- 模式二：詳細統計清單 -->
       <div id="detailContent" style="display:none;">
-        <div id="detailList" style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 400px; overflow-y: auto; margin-bottom: 20px;"></div>
+        <div id="detailList"
+          style="display:grid; grid-template-columns: 1fr 1fr; gap: 10px; max-height: 400px; overflow-y: auto; margin-bottom: 20px;">
+        </div>
         <div class="btn-group">
-          <button type="button" class="btn-cancel" onclick="closeModal()" style="background:var(--accent-gold); color:#000;">關閉</button>
+          <button type="button" class="btn-cancel" onclick="closeModal()"
+            style="background:var(--accent-gold); color:#000;">關閉</button>
         </div>
       </div>
 
-      <!-- 模式三：報修登記表單 -->
       <form id="repairForm" style="display:none;">
         <div class="form-group"><label>器材名稱</label><select id="repairEquipSelect"></select></div>
         <div class="form-group"><label>數量</label><input type="number" id="repairQty" min="1" value="1"></div>
-        <div class="form-group"><label>損壞狀況描述</label><textarea id="repairNote" placeholder="例如：漏氣、破損、無法開機..."></textarea></div>
-        <div class="form-group"><label>報修人 (姓名/班級)</label><input type="text" id="repairReporter" placeholder="例如：River / 601"></div>
+        <div class="form-group"><label>損壞狀況描述</label><textarea id="repairNote"
+            placeholder="例如：漏氣、破損、無法開機..."></textarea></div>
+        <div class="form-group"><label>報修人 (姓名/班級)</label><input type="text" id="repairReporter"
+            placeholder="例如：River / 601"></div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
           <button type="submit" class="btn-save" style="background:#e74c3c; color:#fff;">送出報修</button>
         </div>
       </form>
 
-      <!-- 模式四：待修復清單 (Modal 內版本) -->
       <div id="repairPendingModal" style="display:none;">
-        <div id="pendingListModal" style="max-height: 400px; overflow-y: auto;">
-          <div style="text-align:center; color:#555; padding:20px;">載入中...</div>
-        </div>
+        <div id="pendingListModal" style="max-height: 400px; overflow-y: auto;"></div>
         <div class="btn-group" style="margin-top: 15px;">
           <button type="button" class="btn-cancel" onclick="closeModal()">關閉</button>
         </div>
       </div>
 
-      <!-- 模式五：維修歷史紀錄 -->
       <div id="repairHistory" style="display:none;">
-        <div id="historyList" style="max-height: 400px; overflow-y: auto;">
-          <div style="text-align:center; color:#555; padding:20px;">載入中...</div>
-        </div>
+        <div id="historyList" style="max-height: 400px; overflow-y: auto;"></div>
         <div class="btn-group" style="margin-top: 15px;">
           <button type="button" class="btn-cancel" onclick="closeModal()">關閉</button>
         </div>
       </div>
 
-      <!-- 模式六：備品快速更新表單 -->
       <form id="spareForm" style="display:none;">
         <div style="margin-bottom:15px; color:var(--accent-gold); font-size:16px;" id="spareEquipTitle">器材名稱</div>
         <div class="form-group"><label>目前備品數量</label><input type="number" id="spareQtyInput" min="0" value="0"></div>
@@ -641,16 +183,14 @@
   <div id="borrowModal" class="modal-overlay" style="display:none;">
     <div class="modal" style="width: 400px; max-width: 90vw;">
       <div class="modal-title">📦 器材借用中心</div>
-      
+
       <div class="modal-tabs">
         <div class="tab active" onclick="switchBorrowTab('form')">📄 我要借用</div>
         <div class="tab" onclick="switchBorrowTab('pending')">⌛ 借用中</div>
         <div class="tab" onclick="switchBorrowTab('history')">📜 歷史紀錄</div>
       </div>
 
-      <!-- 借用表單 -->
       <div id="borrowForm">
-        <!-- 第一組 -->
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
           <div style="flex: 2.5;">
             <label>借用器材 (1)</label>
@@ -661,7 +201,6 @@
             <input type="number" id="borrowQty1" value="1" min="1">
           </div>
         </div>
-        <!-- 第二組 -->
         <div style="display: flex; gap: 10px; margin-bottom: 10px;">
           <div style="flex: 2.5;">
             <label>借用器材 (2)</label>
@@ -672,7 +211,6 @@
             <input type="number" id="borrowQty2" value="0" min="0">
           </div>
         </div>
-        <!-- 第三組 -->
         <div style="display: flex; gap: 10px; margin-bottom: 15px;">
           <div style="flex: 2.5;">
             <label>借用器材 (3)</label>
@@ -683,36 +221,71 @@
             <input type="number" id="borrowQty3" value="0" min="0">
           </div>
         </div>
-        <div class="form-group" style="display: flex; gap: 10px; align-items: flex-end;">
-          <div style="flex: 1.5;">
+        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+          <div>
             <label>借用日期</label>
             <input type="date" id="borrowDate">
           </div>
-          <div style="flex: 1;">
-            <label>起始時間</label>
-            <input type="time" id="borrowStartTime">
+          <div>
+            <label>借用節次</label>
+            <select id="borrowPeriod">
+              <option value="晨間">晨間</option>
+              <option value="第一節">第一節</option>
+              <option value="第二節">第二節</option>
+              <option value="第三節">第三節</option>
+              <option value="第四節">第四節</option>
+              <option value="午休">午休</option>
+              <option value="第五節">第五節</option>
+              <option value="第六節">第六節</option>
+              <option value="第七節">第七節</option>
+            </select>
           </div>
-          <div style="color: #555; padding-bottom: 10px;">~</div>
-          <div style="flex: 1;">
-            <label>結束時間</label>
-            <input type="time" id="borrowEndTime">
+        </div>
+        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+          <div>
+            <label>預計歸還日期</label>
+            <input type="date" id="returnDate">
+          </div>
+          <div>
+            <label>歸還節次</label>
+            <select id="returnPeriod">
+              <option value="晨間">晨間</option>
+              <option value="第一節">第一節</option>
+              <option value="第二節">第二節</option>
+              <option value="第三節">第三節</option>
+              <option value="第四節">第四節</option>
+              <option value="午休">午休</option>
+              <option value="第五節">第五節</option>
+              <option value="第六節">第六節</option>
+              <option value="第七節">第七節</option>
+            </select>
           </div>
         </div>
         <div class="form-group">
           <label>借用人姓名</label>
-          <input type="text" id="borrowTeacher" placeholder="例如：王小明 老師">
+          <div class="composite-input">
+            <span>【</span>
+            <input type="text" id="borrowTeacherInput" placeholder="請輸入姓名" style="width: 100px; text-align: center;">
+            <span class="bracket-close">】</span>
+            <input type="text" id="borrowTitleInput" value="老師" style="width: 120px;">
+          </div>
         </div>
         <div class="form-group">
           <label>班級 / 用途</label>
-          <input type="text" id="borrowClass" placeholder="例如：610 綜合課教學用">
+          <div class="composite-input">
+            <span>【</span>
+            <input type="text" id="borrowClassInput" placeholder="請輸入班級" style="width: 100px; text-align: center;">
+            <span class="bracket-close">】</span>
+            <input type="text" id="borrowPurposeInput" value="教學用。" style="width: 120px;">
+          </div>
         </div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeBorrowModal()">取消</button>
-          <button type="button" onclick="submitBorrow()" class="btn-save" style="background:#3498db; color:#fff;">送出借用</button>
+          <button type="button" onclick="submitBorrow(this)" class="btn-save"
+            style="background:#3498db; color:#fff;">送出借用</button>
         </div>
       </div>
 
-      <!-- 借用中清單 -->
       <div id="borrowPending" style="display:none;">
         <div id="borrowPendingList" style="max-height: 400px; overflow-y: auto;"></div>
         <div class="btn-group" style="margin-top: 15px;">
@@ -720,7 +293,6 @@
         </div>
       </div>
 
-      <!-- 歷史紀錄 -->
       <div id="borrowHistory" style="display:none;">
         <div id="borrowHistoryList" style="max-height: 400px; overflow-y: auto;"></div>
         <div class="btn-group" style="margin-top: 15px;">
@@ -730,963 +302,7 @@
     </div>
   </div>
 
-  <script>
-    const API_URL = 'https://script.google.com/macros/s/AKfycbzkPjn7eBoY1UTTEH_ZIUHEbCctP5Nv_ED_0ZZnXe9S6LVY0k85BjJ7nLP83UHdJaCi/exec';
-
-    let inventory = [];
-    let equipmentList = [];
-
-    window.onload = () => {
-      fetchData();
-      fetchEquipmentList();
-      fetchRepairData();
-      
-      // 檢查是否為掃碼歸還模式
-      const urlParams = new URLSearchParams(window.location.search);
-      const token = urlParams.get('token');
-      if (token === 'BUZI_RETURN_KEY') {
-        localStorage.setItem('returnToken', token);
-        setTimeout(() => {
-          openBorrowModal();
-          switchBorrowTab('pending');
-        }, 1500); // 稍微延遲等資料載入
-      }
-    };
-
-    async function fetchData() {
-      document.getElementById('loadingStatus').textContent = '同步中...';
-      try {
-        const response = await fetch(`${API_URL}?action=getInventory`);
-        inventory = await response.json();
-        renderRacks();
-        document.getElementById('loader').style.display = 'none';
-        document.getElementById('loadingStatus').textContent = '已同步';
-      } catch (e) {
-        console.error("抓取庫存失敗", e);
-      }
-    }
-
-    async function fetchEquipmentList() {
-      try {
-        const response = await fetch(`${API_URL}?action=getEquipment`);
-        equipmentList = await response.json();
-        renderRacks();
-        
-        const selects = [document.getElementById('equipSelect'), document.getElementById('repairEquipSelect')];
-        selects.forEach(select => {
-          select.innerHTML = '<option value="">(空)</option>';
-          const groups = {};
-          equipmentList.forEach(item => {
-            const cat = item.category || '99-未分類';
-            if (!groups[cat]) groups[cat] = [];
-            groups[cat].push(item);
-          });
-          Object.keys(groups).sort().forEach(catName => {
-            const groupEl = document.createElement('optgroup');
-            groupEl.label = catName.split('-').pop();
-            groups[catName].forEach(item => {
-              const opt = document.createElement('option');
-              opt.value = item.name;
-              opt.textContent = item.name;
-              groupEl.appendChild(opt);
-            });
-            select.appendChild(groupEl);
-          });
-        });
-      } catch (e) {
-        console.error("抓取器材清單失敗", e);
-      }
-    }
-
-    function renderRacks() {
-      const container = document.getElementById('racksContainer');
-      container.innerHTML = '';
-      
-      // 空間使用率僅計算 A, B, C, D, E 區域
-      // 使用更寬鬆的判斷，防止因為 "A區" 或 "A-1" 導致抓不到
-      const statsPool = inventory.filter(d => /^[ABCDE]/i.test(d.Rack_ID));
-      const totalSlots = statsPool.filter(d => !d.Status.includes('被') && d.Status !== '停用中').length;
-      const occupied = statsPool.filter(d => d.Equipment_Name && !d.Status.includes('被') && d.Status !== '停用中').length;
-      const totals = {};
-      inventory.forEach(d => {
-        if (d.Equipment_Name) totals[d.Equipment_Name] = (totals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
-      });
-      const totalQty = Object.values(totals).reduce((a, b) => a + b, 0);
-      
-      // 計算待補貨項目
-      let lowStockCount = 0;
-      if (equipmentList && equipmentList.length > 0) {
-        equipmentList.forEach(item => {
-          const current = totals[item.name] || 0;
-          if (current < item.safety) {
-            console.log(`[低庫存預警] ${item.name}: 當前 ${current} < 安全 ${item.safety}`);
-            lowStockCount++;
-          }
-        });
-      }
-
-      document.getElementById('statOccupied').textContent = occupied;
-      document.getElementById('statTotalItems').textContent = totalQty;
-      
-      const usagePercent = totalSlots > 0 ? ((occupied / totalSlots) * 100).toFixed(1) : 0;
-      document.getElementById('statSpace').textContent = usagePercent + '%';
-      
-      const alertVal = document.getElementById('statAlert');
-      const alertCard = document.getElementById('alertCard');
-      alertVal.textContent = lowStockCount;
-      if (lowStockCount > 0) {
-        alertCard.classList.add('alert', 'pulse');
-      } else {
-        alertCard.classList.remove('alert', 'pulse');
-      }
-      // ------------------
-
-      // 1. 重新排序架位：A-G ➔ 樂活 ➔ 備品區
-      const rackIds = [...new Set(inventory.map(item => item.Rack_ID))].sort((a, b) => {
-        const order = (name) => {
-          if (name === "備品區") return 999;
-          if (name === "其他器材") return 998;
-          if (name.includes("樂活教室")) return 900 + (name.includes("B") ? 1 : 0);
-          return name.charCodeAt(0); // A-G 會按字母順序
-        };
-        return order(a) - order(b);
-      });
-
-      rackIds.forEach(rackId => {
-        const isAdmin = !!localStorage.getItem('adminPIN');
-        // 如果是備品區且不是管理員，則跳過不顯示
-        if (rackId === "備品區" && !isAdmin) return;
-
-        const card = document.createElement('div');
-        card.className = 'rack-card';
-        
-        // 橫跨所有欄位
-        if (rackId === "備品區" || rackId === "其他器材") {
-          card.style.gridColumn = '1 / -1';
-        }
-        
-        // 特殊處理備品區與其他器材標題
-        const isInventoryMode = rackId === "備品區" || rackId === "其他器材";
-        let html = `<div class="area-title">${rackId === '備品區' ? '備品區 (所有器材備料狀態)' : '區域 ' + rackId}</div>`;
-        html += `<div id="container-${rackId}"></div>`;
-        card.innerHTML = html;
-        container.appendChild(card);
-        
-        const rackData = inventory.filter(d => d.Rack_ID === rackId);
-
-        if (rackId === "備品區") {
-          // --- 備品區特殊渲染邏輯：依分類分群顯示 ---
-          const mainContainer = document.createElement('div');
-          mainContainer.style.padding = '10px';
-          
-          // 按類別分組
-          const groups = {};
-          equipmentList.forEach(equip => {
-            const cat = equip.category || '99-其他';
-            if (!groups[cat]) groups[cat] = [];
-            groups[cat].push(equip);
-          });
-
-          // 產生各類別的分群框
-          Object.keys(groups).sort().forEach(catKey => {
-            const groupWrapper = document.createElement('div');
-            groupWrapper.style.cssText = `
-              border: 1px solid rgba(255, 255, 255, 0.05);
-              background: rgba(255, 255, 255, 0.02);
-              border-radius: 12px;
-              padding: 15px;
-              margin-bottom: 20px;
-            `;
-            
-            const groupTitle = document.createElement('div');
-            groupTitle.style.cssText = `
-              color: var(--accent-gold);
-              font-size: 14px;
-              font-weight: bold;
-              margin-bottom: 12px;
-              padding-left: 8px;
-              border-left: 3px solid var(--accent-gold);
-              letter-spacing: 1px;
-            `;
-            groupTitle.textContent = catKey.split('-').pop();
-            groupWrapper.appendChild(groupTitle);
-
-            const cardsRow = document.createElement('div');
-            cardsRow.style.cssText = `
-              display: flex;
-              flex-wrap: wrap;
-              gap: 12px;
-            `;
-
-            groups[catKey].forEach(equip => {
-              const spareData = inventory.find(d => d.Rack_ID === "備品區" && d.Equipment_Name === equip.name);
-              const qty = spareData ? spareData.Quantity : 0;
-              const unit = equip.unit || '';
-              
-              const sCard = document.createElement('div');
-              sCard.className = `slot ${qty > 0 ? 'has-item' : ''}`;
-              sCard.style.cssText = `
-                width: 120px !important; 
-                height: 85px !important; 
-                flex: 0 0 120px !important; 
-                display: flex; 
-                flex-direction: column; 
-                justify-content: center; 
-                align-items: center; 
-                cursor: pointer;
-                background: #111;
-                border: 1px solid #222;
-              `;
-              sCard.innerHTML = `
-                <div class="item-name" style="font-size:13px; margin-bottom:5px; color:#eee;">${equip.name}</div>
-                <div class="item-qty" style="font-size:20px; color:var(--accent-gold); font-weight:800; line-height:1;">${qty}</div>
-                <div style="font-size:10px; opacity:0.5; margin-top:3px;">${unit}</div>
-              `;
-              sCard.onclick = () => openSpareModal(equip.name, qty);
-              cardsRow.appendChild(sCard);
-            });
-            groupWrapper.appendChild(cardsRow);
-            mainContainer.appendChild(groupWrapper);
-          });
-          card.appendChild(mainContainer);
-        } else {
-          // --- 一般架位渲染邏輯 ---
-          const levels = [...new Set(rackData.map(d => d.Level))].sort((a, b) => b - a);
-          const levelsToRender = levels.length > 0 ? levels : [1];
-
-          levelsToRender.forEach(l => {
-            const levelRow = document.createElement('div');
-            levelRow.className = 'level-row';
-            levelRow.innerHTML = `<div class="level-label">Level ${l}</div>`;
-            const slotsRow = document.createElement('div');
-            slotsRow.className = 'slots-row';
-            const levelData = rackData.filter(d => d.Level == l);
-
-            for (let b = 1; b <= 4; b++) {
-              const slotData = levelData.find(d => d.Slot_ID.endsWith(`-${b}`));
-              if (!slotData || (slotData.Status && slotData.Status.includes('被'))) continue;
-              const slotDiv = document.createElement('div');
-              slotDiv.className = 'slot';
-              if (slotData.Basket_Size === '大') slotDiv.classList.add('big');
-              if (slotData.Equipment_Name) slotDiv.classList.add('has-item');
-              if (slotData.Status === '停用中') slotDiv.classList.add('disabled');
-              slotDiv.innerHTML = `
-                <div class="slot-id">${slotData.Slot_ID}</div>
-                <div class="item-name">${slotData.Status === '停用中' ? '<span style="font-size:7px; opacity:0.4;">CLOSED</span>' : (slotData.Equipment_Name || '')}</div>
-                <div class="item-qty">${slotData.Status === '停用中' ? '' : (slotData.Quantity > 0 ? slotData.Quantity : '')}</div>
-              `;
-              slotDiv.onclick = () => openModal(slotData);
-              slotsRow.appendChild(slotDiv);
-            }
-            levelRow.appendChild(slotsRow);
-            card.appendChild(levelRow);
-          });
-        }
-      });
-    }
-
-    function closeModal() {
-      document.getElementById('modalOverlay').style.display = 'none';
-    }
-
-    // 輔助函數：開啟彈窗前先清空所有區域
-    function hideAllModalSections() {
-      const sections = ['editForm', 'detailContent', 'repairTabs', 'repairForm', 'repairHistory', 'spareForm', 'repairPendingModal'];
-      sections.forEach(id => {
-        const el = document.getElementById(id);
-        if (el) el.style.display = 'none';
-      });
-    }
-
-    function openModal(data) {
-      hideAllModalSections();
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      const isDisabled = data.Status === "停用中";
-      
-      document.getElementById('editForm').style.display = 'block';
-      document.getElementById('editSlotId').value = data.Slot_ID;
-      document.getElementById('editRackId').value = data.Rack_ID;
-      document.getElementById('editLevel').value = data.Level;
-      
-      let title = data.Slot_ID;
-      if (isDisabled) title += " [🚫 停用中]";
-      document.getElementById('modalTitle').textContent = (isAdmin ? '編輯位置: ' : '位置資訊: ') + title;
-      
-      document.getElementById('equipSelect').value = data.Equipment_Name || '';
-      document.getElementById('qtyInput').value = data.Quantity || 0;
-      document.getElementById('sizeSelect').value = data.Basket_Size || '小';
-      document.getElementById('noteInput').value = data.Note || '';
-      
-      const shouldDisableInput = !isAdmin || isDisabled;
-      document.getElementById('equipSelect').disabled = shouldDisableInput;
-      document.getElementById('qtyInput').disabled = shouldDisableInput;
-      document.getElementById('sizeSelect').disabled = shouldDisableInput;
-      document.getElementById('noteInput').disabled = shouldDisableInput;
-      
-      document.getElementById('adminButtons').style.display = isAdmin ? 'flex' : 'none';
-      document.getElementById('guestButtons').style.display = isAdmin ? 'none' : 'flex';
-      
-      const btnToggle = document.getElementById('btnToggleDisable');
-      if (btnToggle) {
-        btnToggle.textContent = isDisabled ? '啟用此格' : '停用此格';
-        btnToggle.style.background = isDisabled ? 'var(--accent-gold)' : '#444';
-        btnToggle.style.color = isDisabled ? '#000' : '#fff';
-      }
-
-      const slotNum = parseInt(data.Slot_ID.split('-').pop());
-      if (isAdmin && !isDisabled) document.getElementById('sizeSelect').disabled = (slotNum === 4);
-      document.getElementById('modalOverlay').style.display = 'flex';
-    }
-
-    function showEquipmentDetail() {
-      hideAllModalSections();
-      document.getElementById('detailContent').style.display = 'block';
-      
-      const rackTotals = {};
-      const spareTotals = {};
-      
-      inventory.forEach(d => {
-        if (!d.Equipment_Name || d.Quantity <= 0) return;
-        if (d.Rack_ID === "備品區") {
-          spareTotals[d.Equipment_Name] = (spareTotals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
-        } else {
-          rackTotals[d.Equipment_Name] = (rackTotals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
-        }
-      });
-
-      const allEquip = [...new Set([...Object.keys(rackTotals), ...Object.keys(spareTotals)])].sort();
-      let html = '';
-      
-      if (allEquip.length === 0) {
-        html += '<div style="grid-column: span 2; text-align: center; color: #888; padding: 20px;">目前無庫存器材</div>';
-      } else {
-        allEquip.forEach(name => {
-          const r = rackTotals[name] || 0;
-          const s = spareTotals[name] || 0;
-          html += `
-            <div style="background:#111; padding: 10px; border-radius: 8px; border: 1px solid #333; display: flex; flex-direction: column;">
-              <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom:4px;">
-                <span style="font-size: 14px; color: #ddd; font-weight:600;">${name}</span>
-                <span style="font-size: 16px; color: var(--accent-gold); font-weight:700;">${r + s}</span>
-              </div>
-              <div style="font-size: 11px; color: #777; display:flex; gap:10px;">
-                <span>架位: ${r}</span>
-                <span>備品: ${s}</span>
-              </div>
-            </div>`;
-        });
-      }
-      
-      document.getElementById('modalTitle').textContent = '器材庫存分布詳情';
-      document.getElementById('detailList').innerHTML = html;
-      document.getElementById('modalOverlay').style.display = 'flex';
-    }
-
-    function showRestockDetail() {
-      hideAllModalSections();
-      document.getElementById('detailContent').style.display = 'block';
-      
-      const rackTotals = {};
-      const spareTotals = {};
-      inventory.forEach(d => {
-        if (!d.Equipment_Name) return;
-        if (d.Rack_ID === "備品區") {
-          spareTotals[d.Equipment_Name] = (spareTotals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
-        } else {
-          rackTotals[d.Equipment_Name] = (rackTotals[d.Equipment_Name] || 0) + parseInt(d.Quantity);
-        }
-      });
-
-      let html = '';
-      let restockList = equipmentList.filter(item => {
-        const total = (rackTotals[item.name] || 0) + (spareTotals[item.name] || 0);
-        return total < item.safety;
-      });
-      
-      if (restockList.length === 0) {
-        html += '<div style="grid-column: span 2; text-align: center; color: #888; padding: 20px;">所有器材庫存充裕</div>';
-      } else {
-        restockList.forEach(item => {
-          const r = rackTotals[item.name] || 0;
-          const s = spareTotals[item.name] || 0;
-          const current = r + s;
-          const diff = item.safety - current;
-          html += `
-            <div style="background:rgba(255,68,68,0.05); padding: 10px; border-radius: 8px; border: 1px solid rgba(255,68,68,0.2); display: flex; flex-direction: column;">
-              <div style="display:flex; justify-content: space-between; align-items: center; margin-bottom: 5px;">
-                <span style="font-size: 14px; color: #ddd; font-weight:600;">${item.name}</span>
-                <span style="font-size: 12px; color: #ff8888; font-weight:700;">缺 ${diff}</span>
-              </div>
-              <div style="font-size: 11px; color: #888; display:flex; gap:10px;">
-                <span>總量: ${current} / 安全: ${item.safety}</span>
-              </div>
-              <div style="font-size: 10px; color: #666; margin-top:2px;">
-                (架位: ${r} / 備品: ${s})
-              </div>
-            </div>`;
-        });
-      }
-      
-      document.getElementById('modalTitle').textContent = '待補貨器材分佈';
-      document.getElementById('detailList').innerHTML = html;
-      document.getElementById('modalOverlay').style.display = 'flex';
-    }
-
-    async function clearThisSlot() {
-      if (!confirm('確定要清空這個格子的所有資料嗎？')) return;
-      document.getElementById('equipSelect').value = '';
-      document.getElementById('qtyInput').value = 0;
-      document.getElementById('sizeSelect').value = '小';
-      
-      const form = document.getElementById('editForm');
-      form.dispatchEvent(new Event('submit'));
-    }
-
-    function toggleSpares(btn) {
-      const container = document.getElementById('container-備品區');
-      const isHidden = container.style.display === 'none';
-      container.style.display = isHidden ? 'block' : 'none';
-      btn.textContent = isHidden ? '收起詳細格位' : '顯示/編輯詳細格位';
-    }
-
-    document.getElementById('editForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const payload = {
-        action: 'update',
-        slotId: document.getElementById('editSlotId').value,
-        rackId: document.getElementById('editRackId').value,
-        level: parseInt(document.getElementById('editLevel').value),
-        equipment: document.getElementById('equipSelect').value,
-        qty: parseInt(document.getElementById('qtyInput').value),
-        size: document.getElementById('sizeSelect').value,
-        note: document.getElementById('noteInput').value,
-        operator: 'River (Admin)',
-        password: localStorage.getItem('adminPIN')
-      };
-      closeModal();
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        fetchData();
-      } catch (err) { alert('更新失敗'); }
-    };
-
-    // --- 維修相關功能 ---
-    async function fetchRepairData() {
-      try {
-        const response = await fetch(`${API_URL}?action=getRepair`);
-        const repairs = await response.json();
-        renderRepairList(repairs);
-      } catch (e) { console.error("抓取維修資料失敗", e); }
-    }
-
-    function renderRepairList(repairs) {
-      const section = document.getElementById('repairSection');
-      const list = document.getElementById('repairList');
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      if (!repairs || repairs.length === 0) {
-        section.style.display = 'none';
-        return;
-      }
-      section.style.display = 'block';
-      list.innerHTML = repairs.map(item => `
-        <div class="repair-item">
-          <div class="repair-info">
-            <h4>${item.Equipment} x ${item.Quantity}</h4>
-            <p>${item.Note || '無描述'} (${item.Reporter || '匿名'})</p>
-          </div>
-          ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
-        </div>
-      `).join('');
-    }
-
-    function openRepairModal() {
-      document.getElementById('editForm').style.display = 'none';
-      document.getElementById('detailContent').style.display = 'none';
-      document.getElementById('repairTabs').style.display = 'flex';
-      switchRepairTab('form'); // 預設顯示表單
-      document.getElementById('modalTitle').textContent = '🛠️ 器材維修中心';
-      document.getElementById('modalOverlay').style.display = 'flex';
-    }
-
-    function switchRepairTab(type) {
-      const tabs = document.querySelectorAll('.tab');
-      tabs[0].classList.toggle('active', type === 'form');
-      tabs[1].classList.toggle('active', type === 'pending');
-      tabs[2].classList.toggle('active', type === 'history');
-      
-      document.getElementById('repairForm').style.display = type === 'form' ? 'block' : 'none';
-      document.getElementById('repairPendingModal').style.display = type === 'pending' ? 'block' : 'none';
-      document.getElementById('repairHistory').style.display = type === 'history' ? 'block' : 'none';
-      
-      if (type === 'pending') fetchRepairPendingInModal();
-      if (type === 'history') fetchRepairHistory();
-    }
-
-    async function fetchRepairPendingInModal() {
-      const list = document.getElementById('pendingListModal');
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">清單讀取中...</div>';
-      try {
-        const response = await fetch(`${API_URL}?action=getRepair&type=pending`);
-        const pending = await response.json();
-        
-        if (!pending || pending.length === 0) {
-          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前無待維修項目</div>';
-          return;
-        }
-        
-        list.innerHTML = pending.map(item => `
-          <div class="repair-item" style="margin-bottom:10px;">
-            <div class="repair-info">
-              <h4>${item.Equipment} x ${item.Quantity}</h4>
-              <p>${item.Note || '無描述'} (${item.Reporter || '匿名'})</p>
-            </div>
-            ${isAdmin 
-              ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` 
-              : `<span style="font-size: 11px; color: #ff8888; border: 1px solid rgba(255,136,136,0.3); padding: 4px 10px; border-radius: 4px;">待修復</span>`
-            }
-          </div>
-        `).join('');
-      } catch (e) { list.innerHTML = '讀取失敗'; }
-    }
-
-    async function fetchRepairHistory() {
-      const list = document.getElementById('historyList');
-      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">歷史讀取中...</div>';
-      try {
-        const response = await fetch(`${API_URL}?action=getRepair&type=history`);
-        const history = await response.json();
-        
-        if (!history || history.length === 0) {
-          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前尚無維修紀錄</div>';
-          return;
-        }
-        
-        list.innerHTML = history.map(item => `
-          <div class="history-item">
-            <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:5px;">
-              <span style="font-weight:600; color:#eee;"><span class="history-tag">已修復</span>${item.Equipment} x ${item.Quantity}</span>
-              <span style="color:#555; font-size:10px;">${new Date(item.Timestamp).toLocaleDateString()}</span>
-            </div>
-            <div style="color:#888;">狀況：${item.Note || '無描述'}</div>
-            <div style="color:#555; font-size:10px; margin-top:3px;">修復時間：${item.Resolved_At ? new Date(item.Resolved_At).toLocaleString() : '---'}</div>
-          </div>
-        `).join('');
-      } catch (e) { list.innerHTML = '讀取失敗'; }
-    }
-
-    document.getElementById('repairForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const payload = {
-        action: 'addRepair',
-        equipment: document.getElementById('repairEquipSelect').value,
-        qty: parseInt(document.getElementById('repairQty').value),
-        note: document.getElementById('repairNote').value,
-        reporter: document.getElementById('repairReporter').value
-      };
-      if (!payload.equipment) return alert('請選擇器材');
-      
-      closeModal();
-      document.getElementById('loadingStatus').textContent = '登記中...';
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) });
-        fetchRepairData();
-        document.getElementById('loadingStatus').textContent = '已登記';
-      } catch (err) { alert('登記失敗'); }
-    };
-
-    async function resolveRepair(id) {
-      if (!confirm('確認此器材已修復完成並歸位？')) return;
-      document.getElementById('loadingStatus').textContent = '結案中...';
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-          action: 'resolveRepair', 
-          repairId: id,
-          password: localStorage.getItem('adminPIN')
-        }) });
-        fetchRepairData();
-        document.getElementById('loadingStatus').textContent = '已結案';
-      } catch (err) { alert('操作失敗'); }
-    }
-
-    async function toggleDisableSlot() {
-      const slotId = document.getElementById('editSlotId').value;
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      if (!isAdmin) return;
-      
-      closeModal();
-      document.getElementById('loadingStatus').textContent = '更新狀態中...';
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-          action: 'toggleDisable', 
-          slotId: slotId,
-          password: localStorage.getItem('adminPIN')
-        }) });
-        fetchData();
-      } catch (err) { alert('操作失敗'); }
-    }
-
-    // --- 管理員模式切換 ---
-    function updateAdminUI() {
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      document.getElementById('adminStatus').innerHTML = isAdmin ? '🔓 已進入管理模式 (點擊登出)' : '🔒 管理員登入';
-      document.getElementById('adminStatus').style.color = isAdmin ? 'var(--accent-gold)' : '#555';
-    }
-
-    function toggleAdmin() {
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      if (isAdmin) {
-        if (confirm('確定要登出管理員模式嗎？')) {
-          localStorage.removeItem('adminPIN');
-          updateAdminUI();
-          renderRacks(); // 重新渲染以更新按鈕狀態
-        }
-      } else {
-        const pin = prompt('請輸入管理員密碼：');
-        if (pin === null) return;
-        if (pin === '1234') { // 這裡要與 Code.gs 的 ADMIN_PASS 一致
-          localStorage.setItem('adminPIN', pin);
-          updateAdminUI();
-          renderRacks();
-          alert('管理員登入成功！');
-        } else {
-          alert('密碼錯誤！');
-        }
-      }
-    }
-    
-    // 初始化時檢查狀態
-    updateAdminUI();
-
-    function generatePrintLabels() {
-      const printArea = document.getElementById('printArea');
-      printArea.innerHTML = '';
-      
-      const rackIds = [...new Set(inventory.map(item => item.Rack_ID))].sort();
-      
-      rackIds.forEach(rackId => {
-        if (rackId === "備品區" || rackId === "其他器材") return;
-        
-        const rackData = inventory.filter(d => d.Rack_ID === rackId);
-        
-        const page = document.createElement('div');
-        page.className = 'print-page';
-        page.innerHTML = `<div class="print-title">架位 ${rackId}</div>`;
-        
-        const grid = document.createElement('div');
-        grid.className = 'print-grid';
-        
-        // 依照 PDF 樣式與實體架位：Level 3 在上，Level 1 在下
-        for (let l = 3; l >= 1; l--) {
-          for (let s = 1; s <= 4; s++) {
-            const slot = rackData.find(d => d.Level == l && d.Slot_ID.endsWith(`-${s}`));
-            if (!slot) {
-              const emptyDiv = document.createElement('div');
-              emptyDiv.className = 'print-slot';
-              grid.appendChild(emptyDiv);
-              continue;
-            }
-            
-            // 跳過被合併的格子
-            if (slot.Status && slot.Status.includes('被')) continue;
-            
-            const slotDiv = document.createElement('div');
-            slotDiv.className = 'print-slot';
-            if (slot.Basket_Size === '大') slotDiv.classList.add('big');
-            
-            slotDiv.innerHTML = `
-              <div class="print-item-name">${slot.Equipment_Name || ''}</div>
-              <div class="print-item-note">${slot.Note || ''}</div>
-            `;
-            grid.appendChild(slotDiv);
-          }
-        }
-        page.appendChild(grid);
-        printArea.appendChild(page);
-      });
-      
-      // 給瀏覽器一點時間渲染內容後再列印
-      setTimeout(() => {
-        window.print();
-      }, 500);
-    }
-    // --- 備品專用彈窗邏輯 ---
-    function openSpareModal(equipName, currentQty) {
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      if (!isAdmin) return alert('僅限管理員修改備品數量');
-
-      document.getElementById('editForm').style.display = 'none';
-      document.getElementById('detailContent').style.display = 'none';
-      document.getElementById('repairTabs').style.display = 'none';
-      document.getElementById('repairForm').style.display = 'none';
-      document.getElementById('repairHistory').style.display = 'none';
-      document.getElementById('spareForm').style.display = 'block';
-
-      document.getElementById('modalTitle').textContent = '📦 備品數量調整';
-      document.getElementById('spareEquipTitle').textContent = equipName;
-      document.getElementById('spareQtyInput').value = currentQty;
-      document.getElementById('modalOverlay').style.display = 'flex';
-    }
-
-    document.getElementById('spareForm').onsubmit = async (e) => {
-      e.preventDefault();
-      const equipName = document.getElementById('spareEquipTitle').textContent;
-      const qty = parseInt(document.getElementById('spareQtyInput').value);
-      
-      closeModal();
-      document.getElementById('loadingStatus').textContent = '更新備品中...';
-      try {
-        await fetch(API_URL, { method: 'POST', body: JSON.stringify({ 
-          action: 'updateSpare', 
-          equipment: equipName,
-          qty: qty,
-          password: localStorage.getItem('adminPIN')
-        }) });
-      } catch (err) { alert('更新失敗'); }
-    };
-
-    updateAdminUI();
-
-    // --- 借用管理功能 ---
-    function openBorrowModal() {
-      document.getElementById('borrowModal').style.display = 'flex';
-      switchBorrowTab('form');
-      
-      // 初始化器材下拉選單 (三組)
-      for (let i = 1; i <= 3; i++) {
-        const select = document.getElementById(`borrowEquipSelect${i}`);
-        select.innerHTML = '<option value="">(無)</option>';
-        equipmentList.forEach(item => {
-          const opt = document.createElement('option');
-          opt.value = item.name;
-          opt.textContent = item.name;
-          select.appendChild(opt);
-        });
-        // 重設數量
-        document.getElementById(`borrowQty${i}`).value = (i === 1 ? 1 : 0);
-      }
-
-      // 預設填入目前日期與時間
-      const now = new Date();
-      document.getElementById('borrowDate').value = now.toISOString().split('T')[0];
-      document.getElementById('borrowStartTime').value = now.toTimeString().slice(0,5);
-      
-      // 預設結束時間為 40 分鐘後 (一節課)
-      const endTime = new Date(now.getTime() + 40 * 60000);
-      document.getElementById('borrowEndTime').value = endTime.toTimeString().slice(0,5);
-    }
-
-    function closeBorrowModal() {
-      document.getElementById('borrowModal').style.display = 'none';
-    }
-
-    function switchBorrowTab(type) {
-      const tabs = document.querySelectorAll('#borrowModal .tab');
-      tabs[0].classList.toggle('active', type === 'form');
-      tabs[1].classList.toggle('active', type === 'pending');
-      tabs[2].classList.toggle('active', type === 'history');
-      
-      document.getElementById('borrowForm').style.display = type === 'form' ? 'block' : 'none';
-      document.getElementById('borrowPending').style.display = type === 'pending' ? 'block' : 'none';
-      document.getElementById('borrowHistory').style.display = type === 'history' ? 'block' : 'none';
-      
-      if (type === 'pending') fetchBorrowPending();
-      if (type === 'history') fetchBorrowHistory();
-    }
-
-    async function submitBorrow() {
-      const btn = event.target;
-      const originalText = btn.textContent;
-      const teacher = document.getElementById('borrowTeacher').value;
-      const className = document.getElementById('borrowClass').value;
-      const bDate = document.getElementById('borrowDate').value;
-      const sTime = document.getElementById('borrowStartTime').value;
-      const eTime = document.getElementById('borrowEndTime').value;
-
-      if (!teacher) { alert("請填寫借用人姓名"); return; }
-
-      const items = [];
-      for (let i = 1; i <= 3; i++) {
-        const equip = document.getElementById(`borrowEquipSelect${i}`).value;
-        const qty = document.getElementById(`borrowQty${i}`).value;
-        if (equip && qty > 0) {
-          items.push({ equipment: equip, qty: qty });
-        }
-      }
-
-      if (items.length === 0) { alert("請至少選擇一項器材與數量"); return; }
-
-      // 鎖定按鈕防止重複點擊
-      btn.disabled = true;
-      btn.textContent = "處理中...";
-
-      try {
-        await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({
-            action: 'submitBorrow',
-            items: items,
-            teacher: teacher,
-            class: className,
-            borrowTime: `${bDate} ${sTime} ~ ${eTime}`
-          })
-        });
-        
-        alert("登記成功！");
-        document.getElementById('borrowTeacher').value = "";
-        document.getElementById('borrowClass').value = "";
-        switchBorrowTab('pending');
-      } catch (e) { 
-        alert("提交失敗"); 
-      } finally {
-        btn.disabled = false;
-        btn.textContent = originalText;
-      }
-    }
-
-    // 輔助函式：格式化借用時間
-    function formatBorrowTime(rawStr, rangeStr) {
-      // 優先使用專屬時段欄位 (Borrow_Range)
-      if (rangeStr) {
-        try {
-          const parts = rangeStr.split(' '); // [2026-04-22, 08:00, ~, 08:40]
-          const d = new Date(parts[0]);
-          const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-          const dayOfWeek = weekdays[d.getDay()];
-          const y = d.getFullYear();
-          const m = String(d.getMonth() + 1).padStart(2, '0');
-          const day = String(d.getDate()).padStart(2, '0');
-          const timeRange = parts.slice(1).join(''); // 08:00~08:40
-          return `${y}/${m}/${day}(${dayOfWeek})${timeRange}`;
-        } catch(e) { return rangeStr; }
-      }
-
-      if (!rawStr) return "無紀錄";
-      try {
-        const dateObj = new Date(rawStr);
-        if (isNaN(dateObj.getTime())) return rawStr;
-        
-        const weekdays = ["日", "一", "二", "三", "四", "五", "六"];
-        const dayOfWeek = weekdays[dateObj.getDay()];
-        const y = dateObj.getFullYear();
-        const m = String(dateObj.getMonth() + 1).padStart(2, '0');
-        const d = String(dateObj.getDate()).padStart(2, '0');
-        const hh = String(dateObj.getHours()).padStart(2, '0');
-        const mm = String(dateObj.getMinutes()).padStart(2, '0');
-        
-        return `${y}/${m}/${d}(${dayOfWeek})${hh}:${mm}`;
-      } catch (e) { return rawStr; }
-    }
-
-    async function fetchBorrowPending() {
-      const list = document.getElementById('borrowPendingList');
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      const hasReturnToken = localStorage.getItem('returnToken') === 'BUZI_RETURN_KEY';
-      
-      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">讀取中...</div>';
-      try {
-        const response = await fetch(`${API_URL}?action=getBorrow&type=pending`);
-        const data = await response.json();
-        
-        if (!data || data.length === 0) {
-          list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">目前無借用中項目</div>';
-          return;
-        }
-        
-        list.innerHTML = data.map(item => `
-          <div class="repair-item" style="margin-bottom:10px; border:1px solid #333; padding:12px; border-radius:8px;">
-            <div class="repair-info">
-              <h4 style="color:var(--accent-gold); margin:0 0 5px 0;">${item.Equipment} x ${item.Quantity}</h4>
-              <p style="margin:2px 0;">${item.Teacher} (${item.Class || '無'})</p>
-              <p style="font-size:10px; opacity:0.5; margin-top:5px;">借用時間: ${formatBorrowTime(item.Timestamp, item.Borrow_Range)}</p>
-            </div>
-            ${(isAdmin || hasReturnToken) ? `<button class="btn-resolve" onclick="returnBorrow(${item.id})">確認歸還</button>` : 
-                        `<span style="font-size: 11px; color: #3498db; border: 1px solid rgba(52,152,219,0.3); padding: 4px 10px; border-radius: 4px;">借用中</span>`}
-          </div>
-        `).join('');
-      } catch (e) { list.innerHTML = '讀取失敗'; }
-    }
-
-    async function returnBorrow(id) {
-      if (!confirm("確認此器材已歸還？")) return;
-      try {
-        const pwd = localStorage.getItem('adminPIN');
-        const token = localStorage.getItem('returnToken');
-        
-        await fetch(API_URL, {
-          method: 'POST',
-          body: JSON.stringify({ 
-            action: 'returnBorrow', 
-            borrowId: id, 
-            password: pwd,
-            token: token
-          })
-        });
-        fetchBorrowPending();
-      } catch (e) { alert("操作失敗"); }
-    }
-
-    async function fetchBorrowHistory() {
-      const list = document.getElementById('borrowHistoryList');
-      list.innerHTML = '<div style="text-align:center; color:#555; padding:20px;">讀取中...</div>';
-      try {
-        const response = await fetch(`${API_URL}?action=getBorrow&type=history`);
-        const data = await response.json();
-        
-        list.innerHTML = data.map(item => `
-          <div class="history-item" style="margin-bottom:10px; padding:10px; border-bottom:1px solid #222;">
-            <div class="history-status" style="background:#27ae60; padding:2px 6px; border-radius:4px; font-size:10px; margin-bottom:5px; display:inline-block;">已歸還</div>
-            <div class="history-main">
-              <strong style="display:block; margin-bottom:3px;">${item.Equipment} x ${item.Quantity}</strong>
-              <div style="font-size:11px; opacity:0.7;">借用人: ${item.Teacher} | 班級: ${item.Class || '無'}</div>
-              <div style="font-size:10px; margin-top:4px; opacity:0.5;">
-                借用時間: ${formatBorrowTime(item.Timestamp, item.Borrow_Range)}<br>
-                歸還時間: ${formatBorrowTime(item.Returned_At)}
-              </div>
-            </div>
-          </div>
-        `).join('');
-      } catch (e) { list.innerHTML = '讀取失敗'; }
-    }
-    function toggleAdmin() {
-      const current = localStorage.getItem('adminPIN');
-      if (current) {
-        if (confirm('是否登出管理員模式？')) {
-          localStorage.removeItem('adminPIN');
-          updateAdminUI();
-          renderRacks();
-        }
-      } else {
-        const pin = prompt('請輸入管理員密碼:');
-        if (pin === '1234') { // 這裡應與 Code.gs 一致
-          localStorage.setItem('adminPIN', pin);
-          updateAdminUI();
-          renderRacks();
-        } else if (pin !== null) {
-          alert('密碼錯誤');
-        }
-      }
-    }
-
-    function updateAdminUI() {
-      const isAdmin = !!localStorage.getItem('adminPIN');
-      const statusEl = document.getElementById('adminStatus');
-      if (statusEl) {
-        statusEl.textContent = isAdmin ? '🔓 已進入管理模式 (點擊登出)' : '🔒 管理員登入';
-        statusEl.style.background = isAdmin ? 'var(--accent-gold)' : 'transparent';
-        statusEl.style.color = isAdmin ? '#000' : 'var(--text-dim)';
-      }
-      
-      // 控制管理員專屬按鈕與統計卡片
-      const printBtn = document.getElementById('btnPrintLabels');
-      if (printBtn) printBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-      
-      const alertCard = document.getElementById('alertCard');
-      if (alertCard) alertCard.style.display = isAdmin ? 'flex' : 'none';
-    }
-
-    // 初始化介面
-    updateAdminUI();
-  </script>
+  <script src="app.js"></script>
 </body>
+
 </html>
