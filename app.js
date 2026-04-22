@@ -351,11 +351,13 @@ function switchRepairTab(type) {
   if (type === 'pending') fetchRepairPendingInModal();
   if (type === 'history') fetchRepairHistory();
 }
+
 async function fetchRepairData() {
+  const isAdmin = !!localStorage.getItem('adminPIN');
   // 此函式用於首頁側邊欄顯示，也使用緩存
   const now = Date.now();
   if (cacheRepairPending && (now - lastFetchRepairPending < CACHE_TIMEOUT)) {
-    renderRepairList(cacheRepairPending);
+    renderRepairList(cacheRepairPending, isAdmin);
     return;
   }
   
@@ -365,16 +367,29 @@ async function fetchRepairData() {
     const data = await res.json();
     cacheRepairPending = data;
     lastFetchRepairPending = Date.now();
-    renderRepairList(data);
+    renderRepairList(data, isAdmin);
   } catch (e) {}
 }
 
-function renderRepairList(data) {
+function renderRepairList(data, isAdmin) {
   const list = document.getElementById('repairList');
   const section = document.getElementById('repairSection');
   if (!data || data.length === 0) { section.style.display = 'none'; return; }
   section.style.display = 'block';
-  list.innerHTML = data.map(item => `<div class="repair-item"><div><h4>${item.Equipment} x ${item.Quantity}</h4><p>${item.Note||'無'} (${item.Reporter||'匿名'})</p></div><button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button></div>`).join('');
+  list.innerHTML = data.map(item => {
+    const timeStr = new Date(item.Timestamp).toLocaleString('zh-TW', { hour12: false });
+    return `
+      <div class="repair-item" style="display:flex; flex-direction:column; align-items:flex-start; gap:5px;">
+        <div style="width:100%; display:flex; justify-content:space-between; align-items:flex-start;">
+          <h4 style="margin:0;">${item.Equipment} x ${item.Quantity}</h4>
+          ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
+        </div>
+        <p style="margin:0; font-size:12px; color:#ddd;">描述：${item.Note||'無'}</p>
+        <p style="margin:0; font-size:11px; color:#aaa;">報修人：${item.Reporter||'匿名'}</p>
+        <p style="margin:0; font-size:10px; color:#888;">時間：${timeStr}</p>
+      </div>
+    `;
+  }).join('');
 }
 
 async function resolveRepair(id) {
@@ -391,10 +406,11 @@ async function resolveRepair(id) {
 
 async function fetchRepairPendingInModal() {
   const list = document.getElementById('pendingListModal');
+  const isAdmin = !!localStorage.getItem('adminPIN');
   
   const now = Date.now();
   if (cacheRepairPending && (now - lastFetchRepairPending < CACHE_TIMEOUT)) {
-    list.innerHTML = cacheRepairPending.length ? cacheRepairPending.map(item => `<div class="repair-item"><div><h4>${item.Equipment} x ${item.Quantity}</h4><p>${item.Note||'無'}</p></div><button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button></div>`).join('') : '目前無待修項目';
+    renderRepairModalItems(cacheRepairPending, isAdmin);
     return;
   }
 
@@ -404,8 +420,32 @@ async function fetchRepairPendingInModal() {
     const data = await res.json();
     cacheRepairPending = data;
     lastFetchRepairPending = Date.now();
-    list.innerHTML = data.length ? data.map(item => `<div class="repair-item"><div><h4>${item.Equipment} x ${item.Quantity}</h4><p>${item.Note||'無'}</p></div><button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button></div>`).join('') : '目前無待修項目';
+    renderRepairModalItems(data, isAdmin);
   } catch (e) { list.innerHTML = '讀取失敗'; }
+}
+
+function renderRepairModalItems(data, isAdmin) {
+  const list = document.getElementById('pendingListModal');
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:#555;">目前無待修項目</div>';
+    return;
+  }
+  list.innerHTML = data.map(item => {
+    const timeStr = new Date(item.Timestamp).toLocaleString('zh-TW', { hour12: false });
+    return `
+      <div class="repair-item" style="margin-bottom:12px; display:flex; flex-direction:column; gap:5px; align-items:flex-start;">
+        <div style="width:100%; display:flex; justify-content:space-between;">
+          <h4 style="margin:0; color:var(--accent-gold);">${item.Equipment} x ${item.Quantity}</h4>
+          ${isAdmin ? `<button class="btn-resolve" onclick="resolveRepair(${item.id})">已修復</button>` : ''}
+        </div>
+        <p style="margin:0; font-size:13px; color:#eee;">描述：${item.Note||'無'}</p>
+        <div style="margin-top:5px; border-top:1px solid #333; width:100%; padding-top:5px;">
+          <p style="margin:0; font-size:12px; color:#aaa;">報修人：${item.Reporter||'匿名'}</p>
+          <p style="margin:0; font-size:11px; color:#777;">報修時間：${timeStr}</p>
+        </div>
+      </div>
+    `;
+  }).join('');
 }
 
 async function fetchRepairHistory() {
@@ -413,7 +453,8 @@ async function fetchRepairHistory() {
   
   const now = Date.now();
   if (cacheRepairHistory && (now - lastFetchRepairHistory < CACHE_TIMEOUT)) {
-    list.innerHTML = cacheRepairHistory.length ? cacheRepairHistory.map(item => `<div class="history-item"><div><span class="history-tag">已修復</span>${item.Equipment} x ${item.Quantity}</div><div style="color:#555; font-size:10px;">${new Date(item.Timestamp).toLocaleDateString()}</div></div>`).join('') : '無紀錄';
+    console.log("Using cached history");
+    renderHistoryItems(cacheRepairHistory);
     return;
   }
 
@@ -421,21 +462,101 @@ async function fetchRepairHistory() {
   try {
     const res = await fetch(`${API_URL}?action=getRepair&type=history`);
     const data = await res.json();
+    console.log("History data received:", data);
     cacheRepairHistory = data;
     lastFetchRepairHistory = Date.now();
-    list.innerHTML = data.length ? data.map(item => `<div class="history-item"><div><span class="history-tag">已修復</span>${item.Equipment} x ${item.Quantity}</div><div style="color:#555; font-size:10px;">${new Date(item.Timestamp).toLocaleDateString()}</div></div>`).join('') : '無紀錄';
-  } catch (e) { list.innerHTML = '讀取失敗'; }
+    renderHistoryItems(data);
+  } catch (e) { 
+    console.error("Fetch history error:", e);
+    list.innerHTML = '連線失敗或後端錯誤'; 
+  }
+}
+
+function renderHistoryItems(data) {
+  console.log("Start rendering history items...");
+  const list = document.getElementById('historyList');
+  if (!list) {
+    console.error("Element #historyList not found!");
+    return;
+  }
+
+  if (!data || data.length === 0) {
+    list.innerHTML = '<div style="text-align:center; padding:20px; color:#555;">無紀錄</div>';
+    return;
+  }
+  
+  try {
+    const html = data.map((item, idx) => {
+      console.log(`Processing item ${idx}:`, item);
+      let resolveTime = '未知';
+      if (item.Resolved_At) {
+        try {
+          const d = new Date(item.Resolved_At);
+          resolveTime = isNaN(d.getTime()) ? item.Resolved_At : d.toLocaleString('zh-TW', { hour12: false });
+        } catch (e) { resolveTime = item.Resolved_At; }
+      }
+      
+      return `
+        <div class="history-item">
+          <div style="display:flex; justify-content:space-between; align-items:center;">
+            <div><span class="history-tag">已修復</span><strong>${item.Equipment || '未知器材'} x ${item.Quantity || 0}</strong></div>
+          </div>
+          <div style="margin-top:5px; color:#888; font-size:11px;">
+            <div>報修人：${item.Reporter || '匿名'}</div>
+            <div>修復時間：${resolveTime}</div>
+          </div>
+        </div>
+      `;
+    }).join('');
+    list.innerHTML = html;
+    console.log("History rendering complete!");
+  } catch (err) {
+    console.error("Render history error:", err);
+    list.innerHTML = '渲染失敗：' + err.message;
+  }
 }
 
 document.getElementById('repairForm').onsubmit = async (e) => {
   e.preventDefault();
-  const payload = { action: 'addRepair', equipment: document.getElementById('repairEquipSelect').value, qty: parseInt(document.getElementById('repairQty').value), note: document.getElementById('repairNote').value, reporter: document.getElementById('repairReporter').value };
-  closeModal();
+  const btn = e.submitter || e.target.querySelector('button[type="submit"]');
+  const originalText = btn.innerText;
+  
+  const reporterName = document.getElementById('repairReporterName').value;
+  const reporterClass = document.getElementById('repairReporterClass').value;
+  const fullReporter = reporterClass ? `【${reporterName}】老師 / ${reporterClass}` : `【${reporterName}】老師`;
+  
+  // 鎖定按鈕避免重複點擊
+  btn.disabled = true;
+  btn.innerText = "傳送中...";
+  btn.style.opacity = "0.7";
+
+  const payload = { 
+    action: 'addRepair', 
+    equipment: document.getElementById('repairEquipSelect').value, 
+    qty: parseInt(document.getElementById('repairQty').value), 
+    note: document.getElementById('repairNote').value, 
+    reporter: fullReporter 
+  };
+  
   try { 
     await fetch(API_URL, { method: 'POST', body: JSON.stringify(payload) }); 
     cacheRepairPending = null; // 清除緩存以顯示新報修
+    alert("報修登記成功！");
+    
+    // 不關閉視窗，改為切換到「待修復」分頁
     fetchRepairData(); 
-  } catch (e) {}
+    switchRepairTab('pending');
+    
+    // 清空表單內容
+    document.getElementById('repairNote').value = '';
+    document.getElementById('repairQty').value = '1';
+  } catch (e) {
+    alert("報修失敗，請檢查網路連線");
+  } finally {
+    btn.disabled = false;
+    btn.innerText = originalText;
+    btn.style.opacity = "1";
+  }
 };
 
 // --- 借用中心 ---

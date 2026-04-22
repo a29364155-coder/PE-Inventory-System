@@ -145,8 +145,24 @@
         <div class="form-group"><label>數量</label><input type="number" id="repairQty" min="1" value="1"></div>
         <div class="form-group"><label>損壞狀況描述</label><textarea id="repairNote"
             placeholder="例如：漏氣、破損、無法開機..."></textarea></div>
-        <div class="form-group"><label>報修人 (姓名/班級)</label><input type="text" id="repairReporter"
-            placeholder="例如：River / 601"></div>
+        <div class="form-group">
+          <label>報修人姓名</label>
+          <div class="bracket-input-group">
+            <span class="bracket-text">【</span>
+            <input type="text" id="repairReporterName" placeholder="請輸入姓名" required>
+            <span class="bracket-text">】</span>
+            <span class="bracket-suffix"> 老師</span>
+          </div>
+        </div>
+        <div class="form-group">
+          <label>班級</label>
+          <div class="bracket-input-group">
+            <span class="bracket-text">【</span>
+            <input type="text" id="repairReporterClass" placeholder="請輸入班級">
+            <span class="bracket-text">】</span>
+            <span class="bracket-suffix"> (若無則不用填)</span>
+          </div>
+        </div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
           <button type="submit" class="btn-save" style="background:#e74c3c; color:#fff;">送出報修</button>
