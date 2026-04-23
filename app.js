@@ -923,9 +923,30 @@ function toggleAdmin() {
 }
 function updateAdminUI() {
   const isAdmin = !!localStorage.getItem('adminPIN');
+  const isStation = document.body.classList.contains('station-mode-active');
   const statusEl = document.getElementById('adminStatus');
-  if (statusEl) { statusEl.textContent = isAdmin ? '🔓 已進入管理模式' : '🔒 管理員登入'; statusEl.style.background = isAdmin ? 'var(--accent-gold)' : 'transparent'; }
-  const printBtn = document.getElementById('btnPrintLabels'); if (printBtn) printBtn.style.display = isAdmin ? 'inline-flex' : 'none';
-  const alertCard = document.getElementById('alertCard'); if (alertCard) alertCard.style.display = isAdmin ? 'flex' : 'none';
-  fetchRepairData(); // 確保維修清單的按鈕也會跟著權限切換
+  
+  if (statusEl) { 
+    statusEl.textContent = isAdmin ? '🔓 已進入管理模式' : '🔒 管理員登入'; 
+    statusEl.style.background = isAdmin ? 'var(--accent-gold)' : 'transparent'; 
+    // 如果是登記站模式，連管理員登入按鈕也要隱藏
+    if (isStation) statusEl.style.display = 'none';
+  }
+
+  const printBtn = document.getElementById('btnPrintLabels'); 
+  if (printBtn) {
+    // 優先判斷：如果是登記站模式，強制隱藏
+    if (isStation) {
+      printBtn.style.display = 'none';
+    } else {
+      printBtn.style.display = isAdmin ? 'inline-flex' : 'none';
+    }
+  }
+
+  const alertCard = document.getElementById('alertCard'); 
+  if (alertCard) {
+    alertCard.style.display = (isAdmin && !isStation) ? 'flex' : 'none';
+  }
+  
+  fetchRepairData(); 
 }
