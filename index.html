@@ -36,7 +36,7 @@
         </div>
         <div class="sub-title">及時監測體育器材庫存與擺放位置</div>
       </div>
-      <div style="display: flex; gap: 10px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
+      <div style="display: flex; gap: 5px; align-items: center; flex-wrap: wrap; justify-content: flex-end;">
         <span id="adminStatus" onclick="toggleAdmin()" class="status-badge"
           style="cursor:pointer; border:1px solid #444; font-size:11px;">🔒 管理員登入</span>
         <button onclick="openBorrowModal()" class="status-badge"
@@ -58,16 +58,19 @@
 
   <!-- 公用登記站模式專屬介面 -->
   <div id="stationDashboard" class="station-dashboard" style="display:none;">
+    <div class="station-time-container">
+      <div id="stationDate" class="station-date">2026年4月23日 星期四</div>
+      <div id="stationClock" class="station-clock">18:20:00</div>
+    </div>
     <div class="station-welcome">
-      <h2>歡迎使用器材登記站</h2>
-      <p style="color: #888; margin-bottom: 5px;">請選擇您要進行的操作</p>
+      <h2>歡迎使用體育器材登記站</h2>
       <div style="text-align: center; margin-bottom: 30px;">
         <p class="refresh-tip">⚠️ 使用前請先按 <span class="key-cap">Ctrl</span> + <span class="key-cap">F5</span> (重新整理) 以確保資料同步</p>
       </div>
     </div>
     <div class="station-grid">
       <div class="station-btn borrow" onclick="openBorrowModal()">
-        <div class="btn-icon">📦</div>
+        <div class="btn-icon">🏀</div>
         <div class="btn-text">
           <span class="main-txt">我要借用</span>
           <span class="sub-txt">Borrow Equipment</span>
@@ -89,7 +92,7 @@
       </div>
     </div>
     <div class="station-footer">
-      <span onclick="exitStationMode()" style="cursor:help; opacity:0.3;">數位登記站模式</span>
+      <span onclick="handleStationExitClick()" style="cursor:default; opacity:0.1; font-size:10px;">Terminal Mode v1.0</span>
     </div>
   </div>
 
@@ -126,6 +129,14 @@
 
   <!-- 隱藏的列印區 -->
   <div id="printArea"></div>
+
+  <!-- 情感反饋：全螢幕成功/錯誤特效 -->
+  <div id="feedbackOverlay" class="feedback-overlay">
+    <div class="feedback-content">
+      <div id="feedbackIcon" class="feedback-icon"></div>
+      <div id="feedbackMsg" class="feedback-msg"></div>
+    </div>
+  </div>
 
   <footer>
     <div class="dev-credit">Digital Transformation Project</div>
@@ -188,12 +199,12 @@
         <div class="form-group">
           <label>報修人姓名</label>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="bracket-input-group" style="flex: 0 0 150px;">
+            <div class="bracket-input-group" style="flex: 1;">
               <span class="bracket-text">【</span>
               <input type="text" id="repairReporterName" placeholder="請輸入姓名" required>
               <span class="bracket-text">】</span>
             </div>
-            <div class="title-chips" id="repairTitleChips" style="margin-top: 0; flex-wrap: nowrap;">
+            <div class="title-chips" id="repairTitleChips" style="margin-top: 0; flex: 0 0 auto;">
               <div class="chip active" onclick="selectChip(this, 'repair')">老師</div>
               <div class="chip" onclick="selectChip(this, 'repair')">學生</div>
               <div class="chip" onclick="selectChip(this, 'repair')">社團老師</div>
@@ -206,8 +217,8 @@
             <span class="bracket-text">【</span>
             <input type="text" id="repairReporterClass" placeholder="請輸入班級或單位">
             <span class="bracket-text">】</span>
-            <span class="bracket-suffix"> (若無則不用填)</span>
           </div>
+          <div style="font-size: 14px; color: var(--text-dim); margin-top: 8px; padding-left: 10px;">(若無則不用填)</div>
         </div>
         <div class="btn-group">
           <button type="button" class="btn-cancel" onclick="closeModal()">取消</button>
@@ -253,7 +264,7 @@
       </div>
 
       <div id="borrowForm">
-        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+        <div class="form-group" style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (1)</label>
             <select id="borrowEquipSelect1"></select>
@@ -263,7 +274,7 @@
             <input type="number" id="borrowQty1" value="1" min="1">
           </div>
         </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+        <div class="form-group" style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (2)</label>
             <select id="borrowEquipSelect2"></select>
@@ -273,7 +284,7 @@
             <input type="number" id="borrowQty2" value="0" min="0">
           </div>
         </div>
-        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
+        <div class="form-group" style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (3)</label>
             <select id="borrowEquipSelect3"></select>
@@ -329,18 +340,18 @@
             </select>
           </div>
         </div>
-        <div class="form-group" style="margin-bottom: 8px;">
+        <div class="form-group" style="margin-bottom: 15px;">
           <label>借用人姓名</label>
           <div style="display: flex; align-items: center; gap: 10px;">
-            <div class="composite-input" style="padding: 0 5px; flex: 0 0 130px;">
-              <span>【</span>
-              <input type="text" id="borrowTeacherInput" placeholder="請輸入姓名" style="width: 80px; text-align: center; padding: 6px 2px !important;">
-              <span class="bracket-close">】</span>
+            <div class="bracket-input-group" style="flex: 1;">
+              <span class="bracket-text">【</span>
+              <input type="text" id="borrowTeacherInput" placeholder="請輸入姓名" required>
+              <span class="bracket-text">】</span>
             </div>
-            <div class="title-chips" id="borrowTitleChips" style="margin-top: 0; gap: 5px; flex-wrap: nowrap;">
-              <div class="chip active" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">老師</div>
-              <div class="chip" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">學生</div>
-              <div class="chip" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">社團老師</div>
+            <div class="title-chips" id="borrowTitleChips" style="margin-top: 0; flex: 0 0 auto;">
+              <div class="chip active" onclick="selectChip(this, 'borrow')">老師</div>
+              <div class="chip" onclick="selectChip(this, 'borrow')">學生</div>
+              <div class="chip" onclick="selectChip(this, 'borrow')">社團老師</div>
             </div>
           </div>
         </div>
@@ -374,6 +385,25 @@
         <div class="btn-group" style="margin-top: 15px;">
           <button type="button" class="btn-cancel" style="width:100%;" onclick="closeBorrowModal()">關閉</button>
         </div>
+      </div>
+    </div>
+  </div>
+
+  <div id="feedbackOverlay" class="feedback-overlay">
+    <div class="feedback-content">
+      <div id="feedbackIcon" class="feedback-icon"></div>
+      <div id="feedbackMsg" class="feedback-msg"></div>
+    </div>
+  </div>
+
+  <!-- 情感反饋：全螢幕確認視窗 -->
+  <div id="confirmOverlay" class="feedback-overlay">
+    <div class="feedback-content" style="max-width: 800px;">
+      <div class="feedback-icon" style="color: #f1c40f; font-size: 120px;">⚠️</div>
+      <div id="confirmMsg" class="feedback-msg" style="font-size: 32px; margin-bottom: 50px; line-height: 1.6;"></div>
+      <div class="btn-group" style="gap: 30px;">
+        <button id="confirmBtnYes" class="btn-save" style="font-size: 32px; padding: 25px 60px; border-radius: 20px;">已確認</button>
+        <button id="confirmBtnNo" class="btn-cancel" style="font-size: 32px; padding: 25px 60px; border-radius: 20px;">取消</button>
       </div>
     </div>
   </div>

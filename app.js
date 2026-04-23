@@ -16,6 +16,55 @@ let lastFetchRepairHistory = 0;
 
 const CACHE_TIMEOUT = 30000; // 30 秒緩存時間
 
+// 情感反饋函式
+function showFeedback(msg, type = 'success') {
+  const overlay = document.getElementById('feedbackOverlay');
+  const icon = document.getElementById('feedbackIcon');
+  const msgEl = document.getElementById('feedbackMsg');
+  
+  overlay.classList.remove('success', 'error', 'feedback-fade-out');
+  overlay.classList.add(type);
+  
+  icon.innerHTML = type === 'success' ? '✅' : '❌';
+  msgEl.textContent = msg;
+  
+  overlay.style.display = 'flex';
+  
+  // 2秒後自動消失
+  setTimeout(() => {
+    overlay.classList.add('feedback-fade-out');
+    setTimeout(() => {
+      overlay.style.display = 'none';
+      overlay.classList.remove('feedback-fade-out');
+    }, 500);
+  }, 2000);
+}
+
+// 旗艦級確認視窗
+function showConfirm(msg) {
+  return new Promise((resolve) => {
+    const overlay = document.getElementById('confirmOverlay');
+    const msgEl = document.getElementById('confirmMsg');
+    const btnYes = document.getElementById('confirmBtnYes');
+    const btnNo = document.getElementById('confirmBtnNo');
+    
+    msgEl.innerHTML = msg.replace(/\n/g, '<br>');
+    overlay.style.display = 'flex';
+    overlay.classList.remove('feedback-fade-out');
+    
+    const cleanup = (val) => {
+      overlay.classList.add('feedback-fade-out');
+      setTimeout(() => {
+        overlay.style.display = 'none';
+        resolve(val);
+      }, 400);
+    };
+    
+    btnYes.onclick = () => cleanup(true);
+    btnNo.onclick = () => cleanup(false);
+  });
+}
+
 function showSkeleton(container, count = 3) {
   if (!container) return;
   container.innerHTML = Array(count).fill(0).map(() => `
@@ -58,6 +107,89 @@ async function initApp() {
     checkStationMode(); // 檢查是否為登記站模式
     hideLoading();
     updateAdminUI();
+    initIdleTimer(); // 初始化閒置重置計時器
+    startClock();    // 啟動大螢幕時鐘
+  }
+}
+
+function startClock() {
+  const clockEl = document.getElementById('stationClock');
+  const dateEl = document.getElementById('stationDate');
+  if (!clockEl || !dateEl) return;
+
+  const update = () => {
+    const now = new Date();
+    const h = String(now.getHours()).padStart(2, '0');
+    const m = String(now.getMinutes()).padStart(2, '0');
+    const s = String(now.getSeconds()).padStart(2, '0');
+    clockEl.textContent = `${h}:${m}:${s}`;
+
+    const y = now.getFullYear();
+    const mm = now.getMonth() + 1;
+    const dd = now.getDate();
+    const days = ['星期日', '星期一', '星期二', '星期三', '星期四', '星期五', '星期六'];
+    const dname = days[now.getDay()];
+    dateEl.textContent = `${y}年${mm}月${dd}日 ${dname}`;
+  };
+
+  update();
+  setInterval(update, 1000);
+}
+
+// --- 終端機輔助功能：閒置重置與隱藏退出 ---
+let idleTimeout;
+let exitClickCount = 0;
+let lastExitClickTime = 0;
+
+function initIdleTimer() {
+  const urlParams = new URLSearchParams(window.location.search);
+  if (urlParams.get('mode') !== 'station') return;
+
+  console.log("Idle timer initialized (60s)");
+  const events = ['mousemove', 'mousedown', 'keypress', 'touchstart', 'scroll'];
+  events.forEach(evt => {
+    window.addEventListener(evt, resetIdleTimer, true);
+  });
+  resetIdleTimer();
+}
+
+function resetIdleTimer() {
+  clearTimeout(idleTimeout);
+  idleTimeout = setTimeout(autoResetSystem, 60000); // 60 秒回首頁
+}
+
+function autoResetSystem() {
+  if (!document.body.classList.contains('station-mode-active')) return;
+  
+  // 如果有彈窗開啟，則重置回首頁
+  const isBorrowing = document.getElementById('borrowModal').style.display === 'flex';
+  const isRepairing = document.getElementById('repairModal').style.display === 'flex';
+  const isOtherModal = document.getElementById('modalOverlay').style.display === 'flex';
+  
+  if (isBorrowing || isRepairing || isOtherModal) {
+    console.log("System idle for 60s, resetting to home...");
+    closeModal();
+    closeBorrowModal();
+    resetBorrowForm();
+    const dashboard = document.getElementById('stationDashboard');
+    if (dashboard) dashboard.style.display = 'block';
+  }
+}
+
+function handleStationExitClick() {
+  const now = Date.now();
+  if (now - lastExitClickTime > 2000) {
+    exitClickCount = 1;
+  } else {
+    exitClickCount++;
+  }
+  lastExitClickTime = now;
+
+  if (exitClickCount >= 5) {
+    exitStationMode();
+    exitClickCount = 0;
+  } else {
+    console.log(`Exit trigger: ${exitClickCount}/5`);
   }
 }
 
@@ -647,7 +779,17 @@ function resetBorrowForm() {
     c.classList.toggle('active', idx === 0);
   });
 
-  // 日期與用途通常可保留或重置，這裡選擇清空姓名但保留用途
+  // 預設日期為當天
+  const now = new Date();
+  const y = now.getFullYear();
+  const m = String(now.getMonth() + 1).padStart(2, '0');
+  const d = String(now.getDate()).padStart(2, '0');
+  const today = `${y}-${m}-${d}`;
+  const bDate = document.getElementById('borrowDate');
+  const rDate = document.getElementById('returnDate');
+  if (bDate) bDate.value = today;
+  if (rDate) rDate.value = today;
+
   // 如果需要清空用途可以取消註解下一行
   // document.getElementById('borrowPurposeInput').value = "教學用。";
 }
@@ -715,7 +857,7 @@ async function submitBorrow(btn) {
     // 成功後處理
     cachePending = null; 
     cacheHistory = null;
-    alert("借用登記成功！");
+    showFeedback("登記成功！", "success");
     
     // 清空表單，讓下一個人使用，但不關閉視窗
     resetBorrowForm();
@@ -796,7 +938,8 @@ function renderPendingItems(data, isAdmin, hasReturnToken) {
 }
 
 async function returnBorrowBatch(ids, btn) {
-  if (!confirm(`請確認每樣器材都有確實歸位\n如有遺失請聯繫 體育組`)) return;
+  const confirmed = await showConfirm(`請確認每樣器材都有確實歸位\n如有遺失請聯繫 體育組`);
+  if (!confirmed) return;
   const originalText = btn.innerText;
   btn.disabled = true;
   btn.innerText = "處理中...";
@@ -808,9 +951,10 @@ async function returnBorrowBatch(ids, btn) {
     // 歸還後，清除所有借用相關緩存
     cachePending = null;
     cacheHistory = null;
+    showFeedback("已成功歸還！", "success");
     fetchBorrowPending();
   } catch (e) {
-    alert("歸還失敗");
+    showFeedback("歸還失敗", "error");
     btn.disabled = false;
     btn.innerText = originalText;
   }
@@ -865,10 +1009,10 @@ function renderBorrowHistoryItems(data) {
     return `
       <div class="history-item" style="margin-bottom:15px; padding:15px; border-bottom:1px solid #222; background:rgba(255,255,255,0.01); border-radius:8px;">
         <div style="display:flex; justify-content:space-between; align-items:flex-start; margin-bottom:10px;">
-          <div style="display:flex; flex-wrap:wrap; gap:5px;">
-            ${g.items.map(txt => `<span style="background:#1a1a1a; color:var(--accent-gold); padding:2px 8px; border-radius:4px; font-size:12px; border:1px solid #333;">${txt}</span>`).join('')}
+          <div style="display:flex; flex-wrap:wrap; gap:10px;">
+            ${g.items.map(txt => `<span class="item-tag-small">${txt}</span>`).join('')}
           </div>
-          <span class="history-tag" style="background:#27ae60; color:#fff; font-size:10px; padding:2px 6px; border-radius:4px;">已歸還</span>
+          <span class="history-tag">已歸還</span>
         </div>
         <div style="font-size:13px; color:#ddd; font-weight:bold; margin-bottom:4px;">${g.teacher}</div>
         <div style="font-size:12px; color:#999; margin-bottom:2px;">用途：${g.class}</div>
