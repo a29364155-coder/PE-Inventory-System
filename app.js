@@ -55,9 +55,56 @@ async function initApp() {
   } catch (e) {
     console.error("Init failed", e);
   } finally {
+    checkStationMode(); // 檢查是否為登記站模式
     hideLoading();
     updateAdminUI();
   }
+}
+
+function checkStationMode() {
+  const urlParams = new URLSearchParams(window.location.search);
+  const isStation = urlParams.get('mode') === 'station';
+  
+  if (isStation) {
+    document.body.classList.add('station-mode-active');
+    document.getElementById('stationDashboard').style.display = 'block';
+    document.getElementById('statsPanel').style.display = 'none';
+    document.getElementById('racksContainer').style.display = 'none';
+    document.getElementById('repairSection').style.display = 'none';
+    
+    // 隱藏標頭中的按鈕
+    const headerBtns = document.querySelectorAll('header .status-badge, header button');
+    headerBtns.forEach(btn => btn.style.display = 'none');
+    
+    // 自動授權歸還權限
+    localStorage.setItem('returnToken', 'BUZI_RETURN_KEY');
+    console.log("System initialized in STATION MODE");
+  }
+}
+
+function openStationReturn() {
+  openBorrowModal();
+  switchBorrowTab('pending');
+}
+
+function exitStationMode() {
+  if (confirm("確定要退出登記站模式嗎？(將回到管理介面)")) {
+    const url = new URL(window.location.href);
+    url.searchParams.delete('mode');
+    window.location.href = url.toString();
+  }
+}
+
+function enterStationMode() {
+  const url = new URL(window.location.href);
+  url.searchParams.set('mode', 'station');
+  window.location.href = url.toString();
+}
+
+function selectChip(el, group) {
+  const container = el.parentElement;
+  container.querySelectorAll('.chip').forEach(c => c.classList.remove('active'));
+  el.classList.add('active');
 }
 
 function hideLoading() {
@@ -83,34 +130,41 @@ async function fetchData() {
   }
 }
 
+function populateEquipmentSelect(select, emptyText = '(空)') {
+  if (!select) return;
+  select.innerHTML = `<option value="">${emptyText}</option>`;
+  
+  const groups = {};
+  equipmentList.forEach(item => {
+    const cat = item.category || '99-未分類';
+    if (!groups[cat]) groups[cat] = [];
+    groups[cat].push(item);
+  });
+
+  Object.keys(groups).sort().forEach(catName => {
+    const groupEl = document.createElement('optgroup');
+    groupEl.label = catName.split('-').pop(); // 移除排序用的前綴，如 "01-"
+    
+    // 依名稱排序組內器材
+    groups[catName].sort((a, b) => a.name.localeCompare(b.name, 'zh-Hant')).forEach(item => {
+      const opt = document.createElement('option');
+      opt.value = item.name;
+      opt.textContent = item.name;
+      groupEl.appendChild(opt);
+    });
+    select.appendChild(groupEl);
+  });
+}
+
 async function fetchEquipmentList() {
   try {
     const response = await fetch(`${API_URL}?action=getEquipment`);
     equipmentList = await response.json();
     renderRacks();
     
-    const selects = [document.getElementById('equipSelect'), document.getElementById('repairEquipSelect')];
-    selects.forEach(select => {
-      if (!select) return;
-      select.innerHTML = '<option value="">(空)</option>';
-      const groups = {};
-      equipmentList.forEach(item => {
-        const cat = item.category || '99-未分類';
-        if (!groups[cat]) groups[cat] = [];
-        groups[cat].push(item);
-      });
-      Object.keys(groups).sort().forEach(catName => {
-        const groupEl = document.createElement('optgroup');
-        groupEl.label = catName.split('-').pop();
-        groups[catName].forEach(item => {
-          const opt = document.createElement('option');
-          opt.value = item.name;
-          opt.textContent = item.name;
-          groupEl.appendChild(opt);
-        });
-        select.appendChild(groupEl);
-      });
-    });
+    // 初始化編輯與報修下拉選單
+    populateEquipmentSelect(document.getElementById('equipSelect'), '(空)');
+    populateEquipmentSelect(document.getElementById('repairEquipSelect'), '(空)');
   } catch (e) {
     console.error("抓取器材清單失敗", e);
   }
@@ -532,7 +586,8 @@ document.getElementById('repairForm').onsubmit = async (e) => {
   
   const reporterName = document.getElementById('repairReporterName').value;
   const reporterClass = document.getElementById('repairReporterClass').value;
-  const fullReporter = reporterClass ? `【${reporterName}】老師 / ${reporterClass}` : `【${reporterName}】老師`;
+  const reporterTitle = document.querySelector('#repairTitleChips .chip.active').textContent;
+  const fullReporter = reporterClass ? `【${reporterName}】${reporterTitle} / ${reporterClass}` : `【${reporterName}】${reporterTitle}`;
   
   // 鎖定按鈕避免重複點擊
   btn.disabled = true;
@@ -570,22 +625,31 @@ document.getElementById('repairForm').onsubmit = async (e) => {
 
 // --- 借用中心 ---
 function openBorrowModal() {
-  document.getElementById('borrowModal').style.display = 'flex'; switchBorrowTab('form');
+  document.getElementById('borrowModal').style.display = 'flex'; 
+  switchBorrowTab('form');
+  resetBorrowForm(); // 開啟時也執行一次重置
+}
+
+function resetBorrowForm() {
   for (let i = 1; i <= 3; i++) {
-    const sel = document.getElementById(`borrowEquipSelect${i}`); sel.innerHTML = '<option value="">(無)</option>';
-    equipmentList.forEach(item => { const opt = document.createElement('option'); opt.value = item.name; opt.textContent = item.name; sel.appendChild(opt); });
-    document.getElementById(`borrowQty${i}`).value = (i===1?1:0);
+    const sel = document.getElementById(`borrowEquipSelect${i}`);
+    if (sel) populateEquipmentSelect(sel, '(無)');
+    const qty = document.getElementById(`borrowQty${i}`);
+    if (qty) qty.value = (i === 1 ? 1 : 0);
   }
-  const now = new Date(); 
-  const dateStr = now.toISOString().split('T')[0];
-  document.getElementById('borrowDate').value = dateStr;
-  document.getElementById('returnDate').value = dateStr;
-  document.getElementById('borrowPeriod').value = "第一節";
-  document.getElementById('returnPeriod').value = "第一節";
+  
+  // 姓名與班級清空
   document.getElementById('borrowTeacherInput').value = "";
-  document.getElementById('borrowTitleInput').value = "老師";
   document.getElementById('borrowClassInput').value = "";
-  document.getElementById('borrowPurposeInput').value = "教學用。";
+  
+  // 重置稱謂選項 (預設選第一個)
+  document.querySelectorAll('#borrowTitleChips .chip').forEach((c, idx) => {
+    c.classList.toggle('active', idx === 0);
+  });
+
+  // 日期與用途通常可保留或重置，這裡選擇清空姓名但保留用途
+  // 如果需要清空用途可以取消註解下一行
+  // document.getElementById('borrowPurposeInput').value = "教學用。";
 }
 function closeBorrowModal() { document.getElementById('borrowModal').style.display = 'none'; }
 function switchBorrowTab(type) {
@@ -612,7 +676,7 @@ async function submitBorrow(btn) {
   btn.innerText = "處理中...";
   btn.style.opacity = "0.7";
 
-  const teacherTitle = document.getElementById('borrowTitleInput').value || "";
+  const teacherTitle = document.querySelector('#borrowTitleChips .chip.active').textContent;
   const teacher = `【${teacherName}】${teacherTitle}`;
   const items = [];
   for (let i = 1; i <= 3; i++) {
@@ -647,10 +711,17 @@ async function submitBorrow(btn) {
         borrowTime: borrowRangeStr 
       }) 
     });
-    // 成功送出後，清除緩存，強迫下次讀取新資料
+    
+    // 成功後處理
     cachePending = null; 
-    alert("借用登記成功！"); 
-    switchBorrowTab('pending');
+    cacheHistory = null;
+    alert("借用登記成功！");
+    
+    // 清空表單，讓下一個人使用，但不關閉視窗
+    resetBorrowForm();
+    
+    // 聚焦回姓名輸入框，方便下一個人直接打字
+    document.getElementById('borrowTeacherInput').focus();
   } catch (e) { 
     alert("登記失敗，請檢查網路連線"); 
   } finally {
@@ -725,7 +796,7 @@ function renderPendingItems(data, isAdmin, hasReturnToken) {
 }
 
 async function returnBorrowBatch(ids, btn) {
-  if (!confirm(`確定歸還這 ${ids.length} 樣器材嗎？`)) return;
+  if (!confirm(`請確認每樣器材都有確實歸位\n如有遺失請聯繫 體育組`)) return;
   const originalText = btn.innerText;
   btn.disabled = true;
   btn.innerText = "處理中...";

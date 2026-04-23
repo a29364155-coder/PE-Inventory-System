@@ -45,6 +45,9 @@
         <button onclick="openRepairModal()" class="status-badge"
           style="background:rgba(255,68,68,0.2); color:#ff6666; cursor:pointer; font-weight:bold; border:1px solid rgba(255,68,68,0.3);">🛠️
           報修登記</button>
+        <button onclick="enterStationMode()" class="status-badge"
+          style="background:rgba(255,255,255,0.05); color:#fff; cursor:pointer; font-weight:bold; border:1px solid #444;">🖥️
+          登記站模式</button>
         <button id="btnPrintLabels" onclick="generatePrintLabels()" class="status-badge"
           style="background:var(--accent-gold); color:#000; cursor:pointer; font-weight:bold; border:none;">🖨️
           列印標籤</button>
@@ -52,6 +55,43 @@
       </div>
     </div>
   </header>
+
+  <!-- 公用登記站模式專屬介面 -->
+  <div id="stationDashboard" class="station-dashboard" style="display:none;">
+    <div class="station-welcome">
+      <h2>歡迎使用器材登記站</h2>
+      <p style="color: #888; margin-bottom: 5px;">請選擇您要進行的操作</p>
+      <div style="text-align: center; margin-bottom: 30px;">
+        <p class="refresh-tip">⚠️ 使用前請先按 <span class="key-cap">Ctrl</span> + <span class="key-cap">F5</span> (重新整理) 以確保資料同步</p>
+      </div>
+    </div>
+    <div class="station-grid">
+      <div class="station-btn borrow" onclick="openBorrowModal()">
+        <div class="btn-icon">📦</div>
+        <div class="btn-text">
+          <span class="main-txt">我要借用</span>
+          <span class="sub-txt">Borrow Equipment</span>
+        </div>
+      </div>
+      <div class="station-btn return" onclick="openStationReturn()">
+        <div class="btn-icon">⌛</div>
+        <div class="btn-text">
+          <span class="main-txt">我要歸還</span>
+          <span class="sub-txt">Return Equipment</span>
+        </div>
+      </div>
+      <div class="station-btn repair" onclick="openRepairModal()">
+        <div class="btn-icon">🛠️</div>
+        <div class="btn-text">
+          <span class="main-txt">維修通報</span>
+          <span class="sub-txt">Report Damage</span>
+        </div>
+      </div>
+    </div>
+    <div class="station-footer">
+      <span onclick="exitStationMode()" style="cursor:help; opacity:0.3;">數位登記站模式</span>
+    </div>
+  </div>
 
   <!-- 統計面板 -->
   <div id="statsPanel" class="stats-panel">
@@ -147,18 +187,24 @@
             placeholder="例如：漏氣、破損、無法開機..."></textarea></div>
         <div class="form-group">
           <label>報修人姓名</label>
-          <div class="bracket-input-group">
-            <span class="bracket-text">【</span>
-            <input type="text" id="repairReporterName" placeholder="請輸入姓名" required>
-            <span class="bracket-text">】</span>
-            <span class="bracket-suffix"> 老師</span>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="bracket-input-group" style="flex: 0 0 150px;">
+              <span class="bracket-text">【</span>
+              <input type="text" id="repairReporterName" placeholder="請輸入姓名" required>
+              <span class="bracket-text">】</span>
+            </div>
+            <div class="title-chips" id="repairTitleChips" style="margin-top: 0; flex-wrap: nowrap;">
+              <div class="chip active" onclick="selectChip(this, 'repair')">老師</div>
+              <div class="chip" onclick="selectChip(this, 'repair')">學生</div>
+              <div class="chip" onclick="selectChip(this, 'repair')">社團老師</div>
+            </div>
           </div>
         </div>
         <div class="form-group">
-          <label>班級</label>
+          <label>班級 / 單位</label>
           <div class="bracket-input-group">
             <span class="bracket-text">【</span>
-            <input type="text" id="repairReporterClass" placeholder="請輸入班級">
+            <input type="text" id="repairReporterClass" placeholder="請輸入班級或單位">
             <span class="bracket-text">】</span>
             <span class="bracket-suffix"> (若無則不用填)</span>
           </div>
@@ -207,7 +253,7 @@
       </div>
 
       <div id="borrowForm">
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (1)</label>
             <select id="borrowEquipSelect1"></select>
@@ -217,7 +263,7 @@
             <input type="number" id="borrowQty1" value="1" min="1">
           </div>
         </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 10px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (2)</label>
             <select id="borrowEquipSelect2"></select>
@@ -227,7 +273,7 @@
             <input type="number" id="borrowQty2" value="0" min="0">
           </div>
         </div>
-        <div style="display: flex; gap: 10px; margin-bottom: 15px;">
+        <div style="display: flex; gap: 8px; margin-bottom: 6px;">
           <div style="flex: 2.5;">
             <label>借用器材 (3)</label>
             <select id="borrowEquipSelect3"></select>
@@ -237,7 +283,7 @@
             <input type="number" id="borrowQty3" value="0" min="0">
           </div>
         </div>
-        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-bottom: 8px;">
           <div>
             <label>借用日期</label>
             <input type="date" id="borrowDate">
@@ -254,10 +300,13 @@
               <option value="第五節">第五節</option>
               <option value="第六節">第六節</option>
               <option value="第七節">第七節</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
             </select>
           </div>
         </div>
-        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 10px;">
+        <div class="form-group" style="display: grid; grid-template-columns: 1.5fr 1fr; gap: 8px; margin-bottom: 8px;">
           <div>
             <label>預計歸還日期</label>
             <input type="date" id="returnDate">
@@ -274,25 +323,36 @@
               <option value="第五節">第五節</option>
               <option value="第六節">第六節</option>
               <option value="第七節">第七節</option>
+              <option value="16:00">16:00</option>
+              <option value="17:00">17:00</option>
+              <option value="18:00">18:00</option>
             </select>
           </div>
         </div>
-        <div class="form-group">
+        <div class="form-group" style="margin-bottom: 8px;">
           <label>借用人姓名</label>
-          <div class="composite-input">
-            <span>【</span>
-            <input type="text" id="borrowTeacherInput" placeholder="請輸入姓名" style="width: 100px; text-align: center;">
-            <span class="bracket-close">】</span>
-            <input type="text" id="borrowTitleInput" value="老師" style="width: 120px;">
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="composite-input" style="padding: 0 5px; flex: 0 0 130px;">
+              <span>【</span>
+              <input type="text" id="borrowTeacherInput" placeholder="請輸入姓名" style="width: 80px; text-align: center; padding: 6px 2px !important;">
+              <span class="bracket-close">】</span>
+            </div>
+            <div class="title-chips" id="borrowTitleChips" style="margin-top: 0; gap: 5px; flex-wrap: nowrap;">
+              <div class="chip active" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">老師</div>
+              <div class="chip" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">學生</div>
+              <div class="chip" style="padding: 4px 10px; font-size: 11px;" onclick="selectChip(this, 'borrow')">社團老師</div>
+            </div>
           </div>
         </div>
-        <div class="form-group">
-          <label>班級 / 用途</label>
-          <div class="composite-input">
-            <span>【</span>
-            <input type="text" id="borrowClassInput" placeholder="請輸入班級" style="width: 100px; text-align: center;">
-            <span class="bracket-close">】</span>
-            <input type="text" id="borrowPurposeInput" value="教學用。" style="width: 120px;">
+        <div class="form-group" style="margin-bottom: 8px;">
+          <label>班級 (單位) / 用途</label>
+          <div style="display: flex; align-items: center; gap: 10px;">
+            <div class="composite-input" id="classBox" style="padding: 0 5px; flex: 0 0 130px;">
+              <span>【</span>
+              <input type="text" id="borrowClassInput" placeholder="班級或單位" style="width: 80px; text-align: center; padding: 6px 2px !important;">
+              <span class="bracket-close">】</span>
+            </div>
+            <input type="text" id="borrowPurposeInput" value="教學用。" style="width: 120px; padding: 8px 12px; background: rgba(255,255,255,0.03); border: 1px solid #444; border-radius: 20px; font-size: 13px;">
           </div>
         </div>
         <div class="btn-group">

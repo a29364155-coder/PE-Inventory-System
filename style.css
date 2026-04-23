@@ -247,28 +247,53 @@ header {
 .modal {
   background: #1a1a1a;
   width: 350px;
-  padding: 25px;
+  padding: 20px;
   border-radius: 15px;
   border: 1px solid var(--accent-gold);
   box-shadow: 0 0 50px rgba(212, 175, 55, 0.1);
+  max-height: 95vh;
+  display: flex;
+  flex-direction: column;
 }
 
-.modal-title { font-size: 18px; color: var(--accent-gold); margin-bottom: 20px; text-align: center; }
-.form-group { margin-bottom: 15px; }
-label { display: block; font-size: 12px; color: var(--text-dim); margin-bottom: 5px; }
-select, input, textarea { width: 100%; padding: 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: inherit; }
-textarea { height: 150px; resize: vertical; }
+.modal-title { font-size: 16px; color: var(--accent-gold); margin-bottom: 15px; text-align: center; }
+.form-group { margin-bottom: 10px; }
+label { display: block; font-size: 11px; color: var(--text-dim); margin-bottom: 3px; }
+select, input, textarea { width: 100%; padding: 8px 10px; background: #111; border: 1px solid #333; color: #fff; border-radius: 5px; box-sizing: border-box; font-family: inherit; font-size: 13px; }
+optgroup { background: #111; color: var(--accent-gold); font-weight: bold; font-style: normal; }
+option { background: #111; color: #fff; }
+textarea { height: 80px; resize: vertical; }
 
-.btn-group { display: flex; gap: 10px; margin-top: 20px; }
-button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 14px; transition: all 0.2s; }
+.btn-group { display: flex; gap: 10px; margin-top: 15px; }
+.history-item button, .pending-item button { 
+  padding: 10px 20px; 
+  font-size: 14px; 
+  border-radius: 8px; 
+  cursor: pointer; 
+  transition: all 0.2s;
+  background: var(--accent-gold);
+  color: #000;
+  border: none;
+  font-weight: bold;
+}
+button { flex: 1; padding: 10px; border: none; border-radius: 8px; cursor: pointer; font-family: inherit; font-size: 13px; transition: all 0.2s; }
 .btn-save { background: var(--accent-gold); color: #000; }
 .btn-cancel { background: #444; color: #fff; }
 .btn-delete { background: #e74c3c; color: #fff; }
+
+/* 讓 Modal 內容可捲動但隱藏捲動條或美化它 */
+.modal form, #borrowForm {
+  overflow-y: auto;
+  padding-right: 5px;
+}
+.modal form::-webkit-scrollbar { width: 4px; }
+.modal form::-webkit-scrollbar-thumb { background: #333; border-radius: 10px; }
 
 /* 智慧組合輸入框 */
 .composite-input {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: #111;
   border: 1px solid #333;
   border-radius: 5px;
@@ -333,7 +358,18 @@ button { flex: 1; padding: 12px; border: none; border-radius: 8px; cursor: point
 
 /* 分頁標籤 */
 .modal-tabs { display: flex; gap: 10px; margin-bottom: 20px; border-bottom: 1px solid #333; }
-.tab { padding: 8px 15px; cursor: pointer; font-size: 13px; color: var(--text-dim); border-bottom: 2px solid transparent; }
+.tab {
+  padding: 12px 25px;
+  cursor: pointer;
+  color: var(--text-dim);
+  font-size: 18px;
+  font-weight: 500;
+  transition: all 0.2s;
+  border-bottom: 2px solid transparent;
+  display: flex;
+  align-items: center;
+  gap: 8px;
+}
 .tab.active { color: var(--accent-gold); border-bottom: 2px solid var(--accent-gold); }
 
 .history-item { padding: 10px; background: rgba(46, 204, 113, 0.05); border: 1px solid rgba(46, 204, 113, 0.2); border-radius: 8px; margin-bottom: 8px; font-size: 12px; }
@@ -385,6 +421,7 @@ footer { margin-top: 60px; padding: 30px 20px; text-align: center; font-size: 11
 .bracket-input-group {
   display: flex;
   align-items: center;
+  justify-content: center;
   background: rgba(0, 0, 0, 0.2);
   border: 1px solid #444;
   border-radius: 8px;
@@ -418,4 +455,189 @@ footer { margin-top: 60px; padding: 30px 20px; text-align: center; font-size: 11
   white-space: nowrap;
   text-align: left;
   flex-shrink: 0; /* 防止文字被擠壓 */
+}
+
+/* --- 公用登記站模式 --- */
+.station-dashboard {
+  max-width: 1000px;
+  margin: 40px auto;
+  padding: 0 20px;
+}
+.station-welcome { text-align: center; margin-bottom: 50px; }
+.station-welcome h2 { font-size: 32px; color: #fff; margin-bottom: 10px; }
+.station-welcome p { color: var(--text-dim); }
+
+.station-grid {
+  display: grid;
+  grid-template-columns: repeat(3, 1fr);
+  gap: 25px;
+}
+.station-btn {
+  background: var(--card-bg);
+  border: 1px solid var(--border-color);
+  border-radius: 20px;
+  padding: 40px 20px;
+  text-align: center;
+  cursor: pointer;
+  transition: all 0.3s ease;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 20px;
+}
+.station-btn:hover {
+  transform: translateY(-10px);
+  box-shadow: 0 20px 40px rgba(0,0,0,0.4);
+}
+.station-btn .btn-icon { font-size: 64px; }
+.station-btn .btn-text { display: flex; flex-direction: column; gap: 5px; }
+.station-btn .main-txt { font-size: 24px; font-weight: 600; color: #fff; }
+.station-btn .sub-txt { font-size: 14px; color: var(--text-dim); text-transform: uppercase; letter-spacing: 1px; }
+
+.station-btn.borrow:hover { border-color: #3498db; background: rgba(52, 152, 219, 0.05); }
+.station-btn.return:hover { border-color: #27ae60; background: rgba(39, 174, 96, 0.05); }
+.station-btn.repair:hover { border-color: #e74c3c; background: rgba(231, 76, 60, 0.05); }
+
+.station-footer { margin-top: 60px; text-align: center; font-size: 12px; color: var(--text-dim); }
+
+@media (max-width: 768px) {
+  .station-grid { grid-template-columns: 1fr; }
+  .station-btn { padding: 30px; }
+}
+
+/* --- 稱謂選項按鈕 (Chips) --- */
+.title-chips {
+  display: flex;
+  gap: 8px;
+  margin-top: 10px;
+}
+.chip {
+  padding: 8px 18px;
+  border: 1px solid #444;
+  border-radius: 20px;
+  font-size: 14px;
+  color: var(--text-dim);
+  cursor: pointer;
+  transition: all 0.2s ease;
+  background: rgba(255,255,255,0.02);
+}
+.chip:hover {
+  border-color: var(--accent-gold);
+  color: #fff;
+}
+.chip.active {
+  background: rgba(212, 175, 55, 0.1);
+  border-color: var(--accent-gold);
+  color: var(--accent-gold);
+  font-weight: bold;
+  box-shadow: 0 0 10px rgba(212, 175, 55, 0.1);
+}
+
+/* --- 登記站模式專屬：寬版雙欄位優化 --- */
+body.station-mode-active .modal {
+  width: 850px !important;
+  padding: 30px;
+}
+
+body.station-mode-active .modal-title {
+  font-size: 24px;
+  margin-bottom: 20px;
+}
+
+body.station-mode-active #borrowForm {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 15px 30px;
+  padding-right: 0;
+}
+
+body.station-mode-active #borrowForm > div {
+  margin-bottom: 0 !important;
+}
+
+/* 讓某些欄位跨兩欄 */
+body.station-mode-active #borrowForm .btn-group,
+body.station-mode-active #borrowForm .form-group:last-of-type {
+  grid-column: span 2;
+}
+
+body.station-mode-active label {
+  font-size: 15px;
+  margin-bottom: 5px;
+}
+
+body.station-mode-active select, 
+body.station-mode-active input {
+  font-size: 16px;
+  padding: 10px 15px !important;
+}
+
+body.station-mode-active .chip {
+  font-size: 18px;
+  padding: 12px 25px;
+}
+
+body.station-mode-active .btn-group button {
+  font-size: 18px;
+  padding: 15px;
+}
+
+body.station-mode-active .composite-input input,
+body.station-mode-active #classBox input {
+  width: 150px !important;
+}
+
+body.station-mode-active #borrowPurposeInput {
+  width: 200px !important;
+  font-size: 16px;
+  padding: 12px 18px !important;
+}
+
+body.station-mode-active .pending-item button,
+body.station-mode-active .btn-resolve {
+  padding: 25px 40px !important;
+  font-size: 24px !important;
+  width: 100%;
+  margin-top: 15px;
+  background: var(--accent-gold) !important;
+  color: #000 !important;
+  font-weight: 900 !important;
+  border-radius: 12px;
+  box-shadow: 0 4px 15px rgba(212, 175, 55, 0.3);
+}
+
+.refresh-tip {
+  display: inline-block;
+  background: rgba(212, 175, 55, 0.15);
+  border: 1px solid rgba(212, 175, 55, 0.4);
+  padding: 10px 25px;
+  border-radius: 50px;
+  color: #fff;
+  font-size: 15px;
+  margin: 0;
+  animation: breathing 2.5s infinite ease-in-out;
+  letter-spacing: 0.5px;
+  box-shadow: 0 0 15px rgba(212, 175, 55, 0.05);
+}
+
+@keyframes breathing {
+  0%, 100% { opacity: 0.6; transform: scale(0.98); }
+  50% { opacity: 1; transform: scale(1); }
+}
+
+.key-cap {
+  background: #222;
+  border: 1px solid #444;
+  border-bottom: 3px solid #000;
+  border-radius: 4px;
+  padding: 2px 8px;
+  margin: 0 4px;
+  font-family: 'Courier New', Courier, monospace;
+  font-weight: bold;
+  color: #fff;
+  font-size: 13px;
+  display: inline-block;
+  line-height: 1.2;
+  box-shadow: 0 2px 5px rgba(0,0,0,0.5);
+  vertical-align: middle;
 }
